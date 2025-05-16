@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}PhishGuard - تسجيل الدخول{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: #f0f7ff;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 400px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .auth-header h1 {
+        color: #1a237e;
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .auth-header p {
+        color: #546e7a;
+        font-size: 1.1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #1a237e;
+        font-size: 1.1rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #1976d2;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+    }
+
+    .remember-me {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+
+    .remember-me input[type="checkbox"] {
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+
+    .auth-btn {
+        width: 100%;
+        padding: 0.75rem;
+        background: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .auth-btn:hover {
+        background: #1565c0;
+        transform: translateY(-2px);
+    }
+
+    .auth-links {
+        margin-top: 1.5rem;
+        text-align: center;
+        font-size: 1rem;
+    }
+
+    .auth-links a {
+        color: #1976d2;
+        text-decoration: none;
+    }
+
+    .auth-links a:hover {
+        text-decoration: underline;
+    }
+
+    .divider {
+        margin: 1.5rem 0;
+        text-align: center;
+        position: relative;
+    }
+
+    .divider::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e0e0e0;
+    }
+
+    .divider span {
+        background: white;
+        padding: 0 1rem;
+        color: #90a4ae;
+        position: relative;
+    }
+
+    .social-login {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .social-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+        color: #37474f;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .social-btn:hover {
+        border-color: #1976d2;
+        color: #1976d2;
+        transform: translateY(-2px);
+    }
+
+    /* Dark mode styles */
+    [data-theme="dark"] .auth-container {
+        background: #1a1a2e;
+    }
+
+    [data-theme="dark"] .auth-card {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    [data-theme="dark"] .auth-header h1 {
+        color: #90caf9;
+    }
+
+    [data-theme="dark"] .auth-header p {
+        color: #b0bec5;
+    }
+
+    [data-theme="dark"] .form-group label {
+        color: #90caf9;
+    }
+
+    [data-theme="dark"] .form-control {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: #e0e0e0;
+    }
+
+    [data-theme="dark"] .form-control:focus {
+        border-color: #1976d2;
+    }
+
+    [data-theme="dark"] .divider::before {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    [data-theme="dark"] .divider span {
+        background: #1a1a2e;
+        color: #78909c;
+    }
+
+    [data-theme="dark"] .social-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #b0bec5;
+    }
+
+    [data-theme="dark"] .social-btn:hover {
+        border-color: #1976d2;
+        color: #90caf9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>تسجيل الدخول</h1>
+            <p>مرحباً بك مجدداً!</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="username">اسم المستخدم</label>
+                <input type="text" id="username" name="username" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">كلمة المرور</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+
+            <div class="remember-me">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">تذكرني</label>
+            </div>
+
+            <button type="submit" class="auth-btn">
+                <i class="fas fa-sign-in-alt"></i>
+                تسجيل الدخول
+            </button>
+
+            <div class="auth-links">
+                <a href="{{ url_for('register') }}">ليس لديك حساب؟ سجل الآن</a>
+            </div>
+
+            <div class="divider">
+                <span>أو</span>
+            </div>
+
+            <div class="social-login">
+                <button type="button" class="social-btn">
+                    <i class="fab fa-google"></i>
+                    Google
+                </button>
+                <button type="button" class="social-btn">
+                    <i class="fab fa-github"></i>
+                    GitHub
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

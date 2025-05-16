@@ -1,0 +1,627 @@
+{% extends "base.html" %}
+
+{% block title %}الدعم الفني - PhishGuard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .support-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .support-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .support-header h1 {
+        font-size: 2.5rem;
+        color: var(--text-color);
+        margin-bottom: 1rem;
+    }
+
+    .support-header p {
+        color: var(--text-color-light);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .support-grid {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .support-sidebar {
+        background: var(--container-bg);
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .new-ticket-btn {
+        display: block;
+        width: 100%;
+        padding: 1rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .new-ticket-btn:hover {
+        background: var(--primary-color-dark);
+        transform: translateY(-2px);
+    }
+
+    .support-stats {
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        border-radius: 8px;
+        background: var(--hover-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--text-color);
+        font-size: 0.9rem;
+    }
+
+    .stat-value {
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+
+    .messages-container {
+        background: var(--container-bg);
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .message-card {
+        background: var(--hover-color);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .message-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .message-title {
+        font-size: 1.1rem;
+        color: var(--text-color);
+        margin: 0;
+    }
+
+    .message-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .status-pending {
+        background: rgba(241, 196, 15, 0.1);
+        color: #f1c40f;
+    }
+
+    .status-in-progress {
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+    }
+
+    .status-answered {
+        background: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
+    }
+
+    .message-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        color: var(--text-color-light);
+        margin-top: 0.5rem;
+    }
+
+    .message-date {
+        font-size: 0.85rem;
+    }
+
+    /* نافذة إنشاء تذكرة جديدة */
+    .new-ticket-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: var(--container-bg);
+        border-radius: 15px;
+        padding: 2rem;
+        width: 90%;
+        max-width: 600px;
+        position: relative;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text-color-light);
+    }
+
+    .ticket-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group label {
+        color: var(--text-color);
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-family: inherit;
+        background: var(--container-bg);
+        color: var(--text-color);
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    .form-group textarea {
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    /* نافذة المحادثة */
+    .chat-container {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 350px;
+        height: 500px;
+        background: var(--container-bg);
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        overflow: hidden;
+        flex-direction: column;
+    }
+
+    .chat-header {
+        padding: 1rem;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chat-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .chat-close {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 1.2rem;
+    }
+
+    .chat-messages {
+        flex: 1;
+        padding: 1rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .chat-message {
+        max-width: 80%;
+        padding: 0.75rem 1rem;
+        border-radius: 15px;
+        position: relative;
+        line-height: 1.4;
+    }
+
+    .chat-message.sent {
+        background: var(--primary-color);
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 5px;
+    }
+
+    .chat-message.received {
+        background: var(--hover-color);
+        color: var(--text-color);
+        margin-right: auto;
+        border-bottom-left-radius: 5px;
+    }
+
+    .message-time {
+        font-size: 0.75rem;
+        opacity: 0.8;
+        margin-top: 0.25rem;
+        text-align: right;
+    }
+
+    .chat-input {
+        padding: 1rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .chat-input textarea {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        resize: none;
+        height: 40px;
+        line-height: 20px;
+        font-family: inherit;
+        background: var(--container-bg);
+        color: var(--text-color);
+    }
+
+    .chat-input textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    .send-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .send-btn:hover {
+        background: var(--primary-color-dark);
+    }
+
+    .send-btn:disabled {
+        background: var(--border-color);
+        cursor: not-allowed;
+    }
+
+    .no-messages {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-color-light);
+    }
+
+    .no-messages i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--text-color-light);
+    }
+
+    .no-messages p {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+        .support-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .chat-container {
+            width: 100%;
+            height: 100%;
+            bottom: 0;
+            right: 0;
+            border-radius: 0;
+        }
+
+        .modal-content {
+            width: 95%;
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="support-container">
+    <div class="support-header">
+        <h1>الدعم الفني</h1>
+        <p>نحن هنا لمساعدتك! يمكنك إنشاء تذكرة دعم فني جديدة أو متابعة تذاكرك السابقة.</p>
+    </div>
+
+    <div class="support-grid">
+        <div class="support-sidebar">
+            <button class="new-ticket-btn" onclick="openNewTicketModal()">
+                <i class="fas fa-plus-circle"></i>
+                إنشاء تذكرة جديدة
+            </button>
+
+            <div class="support-stats">
+                <div class="stat-item">
+                    <span class="stat-label">التذاكر المفتوحة</span>
+                    <span class="stat-value">{{ messages|selectattr('status', 'equalto', 'pending')|list|length }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">قيد المعالجة</span>
+                    <span class="stat-value">{{ messages|selectattr('status', 'equalto', 'in_progress')|list|length }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">تم الرد</span>
+                    <span class="stat-value">{{ messages|selectattr('status', 'equalto', 'answered')|list|length }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="messages-container">
+            {% if messages %}
+                {% for message in messages|sort(attribute='created_at', reverse=true) %}
+                <div class="message-card" onclick="openChat({{ message.id }}, '{{ message.subject }}')">
+                    <div class="message-header">
+                        <h3 class="message-title">{{ message.subject }}</h3>
+                        <span class="message-status status-{{ message.status }}">
+                            {% if message.status == 'pending' %}
+                            في انتظار الرد
+                            {% elif message.status == 'in_progress' %}
+                            جاري المعالجة
+                            {% else %}
+                            تم الرد
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="message-content">{{ message.message[:150] }}{% if message.message|length > 150 %}...{% endif %}</div>
+                    <div class="message-meta">
+                        <span class="message-date">{{ message.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                        <span class="message-replies">{{ message.responses|length }} ردود</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-messages">
+                    <i class="fas fa-inbox"></i>
+                    <p>لا توجد تذاكر دعم فني حالياً</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- نافذة إنشاء تذكرة جديدة -->
+<div id="new-ticket-modal" class="new-ticket-modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeNewTicketModal()">&times;</button>
+        <h2>إنشاء تذكرة دعم فني جديدة</h2>
+        <form class="ticket-form" method="POST">
+            <div class="form-group">
+                <label for="subject">الموضوع</label>
+                <input type="text" id="subject" name="subject" required>
+            </div>
+            <div class="form-group">
+                <label for="message">الرسالة</label>
+                <textarea id="message" name="message" required></textarea>
+            </div>
+            <button type="submit" class="new-ticket-btn">
+                <i class="fas fa-paper-plane"></i>
+                إرسال
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- نافذة المحادثة -->
+<div id="chat-window" class="chat-container">
+    <div class="chat-header">
+        <h3 class="chat-title"></h3>
+        <button class="chat-close" onclick="closeChat()">×</button>
+    </div>
+    <div class="chat-messages"></div>
+    <div class="chat-input">
+        <textarea placeholder="اكتب رسالتك هنا..." onkeydown="handleKeyPress(event)"></textarea>
+        <button class="send-btn" onclick="sendMessage()">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+let currentMessageId = null;
+let messageUpdateInterval = null;
+
+function openNewTicketModal() {
+    document.getElementById('new-ticket-modal').style.display = 'flex';
+}
+
+function closeNewTicketModal() {
+    document.getElementById('new-ticket-modal').style.display = 'none';
+}
+
+function openChat(messageId, subject) {
+    currentMessageId = messageId;
+    const chatWindow = document.getElementById('chat-window');
+    chatWindow.style.display = 'flex';
+    chatWindow.querySelector('.chat-title').textContent = subject;
+    loadMessages();
+    
+    if (messageUpdateInterval) {
+        clearInterval(messageUpdateInterval);
+    }
+    messageUpdateInterval = setInterval(loadMessages, 5000);
+}
+
+function closeChat() {
+    document.getElementById('chat-window').style.display = 'none';
+    if (messageUpdateInterval) {
+        clearInterval(messageUpdateInterval);
+        messageUpdateInterval = null;
+    }
+    currentMessageId = null;
+}
+
+function loadMessages() {
+    if (!currentMessageId) return;
+    
+    fetch(`/support/chat/${currentMessageId}/messages`)
+        .then(response => response.json())
+        .then(data => {
+            const messagesContainer = document.querySelector('.chat-messages');
+            messagesContainer.innerHTML = '';
+            
+            data.messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-message ${msg.sender_id == {{ session.user_id }} ? 'sent' : 'received'}`;
+                messageDiv.innerHTML = `
+                    <div class="message-content">${msg.message}</div>
+                    <div class="message-time">
+                        ${msg.sender_name} - ${msg.created_at}
+                        ${!msg.is_read && msg.sender_id == {{ session.user_id }} ? '<i class="fas fa-check"></i>' : ''}
+                    </div>
+                `;
+                messagesContainer.appendChild(messageDiv);
+            });
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            markMessagesAsRead();
+        })
+        .catch(error => console.error('Error loading messages:', error));
+}
+
+function sendMessage() {
+    if (!currentMessageId) return;
+    
+    const textarea = document.querySelector('.chat-input textarea');
+    const message = textarea.value.trim();
+    if (!message) return;
+    
+    const sendBtn = document.querySelector('.send-btn');
+    sendBtn.disabled = true;
+    
+    fetch(`/support/chat/${currentMessageId}/send`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            textarea.value = '';
+            loadMessages();
+        } else {
+            alert('حدث خطأ أثناء إرسال الرسالة');
+        }
+    })
+    .catch(error => {
+        console.error('Error sending message:', error);
+        alert('حدث خطأ أثناء إرسال الرسالة');
+    })
+    .finally(() => {
+        sendBtn.disabled = false;
+    });
+}
+
+function handleKeyPress(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+}
+
+function markMessagesAsRead() {
+    if (!currentMessageId) return;
+    
+    fetch(`/support/chat/${currentMessageId}/mark-read`, {
+        method: 'POST'
+    }).catch(error => console.error('Error marking messages as read:', error));
+}
+
+// إغلاق النوافذ عند النقر خارجها
+document.addEventListener('click', function(event) {
+    const chatWindow = document.getElementById('chat-window');
+    const modal = document.getElementById('new-ticket-modal');
+    
+    if (!event.target.closest('.chat-container') && 
+        !event.target.closest('.message-card') && 
+        chatWindow.style.display === 'flex') {
+        closeChat();
+    }
+    
+    if (event.target === modal) {
+        closeNewTicketModal();
+    }
+});
+
+// منع إغلاق النافذة عند النقر داخل المحتوى
+document.querySelector('.modal-content').addEventListener('click', function(event) {
+    event.stopPropagation();
+});
+</script>
+{% endblock %} 

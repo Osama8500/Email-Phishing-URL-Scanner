@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block title %}PhishGuard - فحص البريد الإلكتروني{% endblock %}
+
+{% block extra_css %}
+<style>
+    .scan-container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem;
+        background: var(--bg-color);
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .scan-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .scan-header h1 {
+        color: var(--text-color);
+        font-size: 2rem;
+        margin: 0;
+    }
+
+    .scan-header .subtitle {
+        margin: 0.5rem 0;
+        font-size: 1rem;
+        color: var(--text-color-light);
+    }
+
+    .scan-form-container {
+        height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .scan-form {
+        width: 100%;
+        max-width: 800px;
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+        font-weight: 500;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--bg-color);
+        color: var(--text-color);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+    }
+
+    .result-card {
+        background: var(--card-bg);
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-top: 2rem;
+        overflow: hidden;
+    }
+
+    .results-layout {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+
+    .status-section {
+        text-align: center;
+        padding: 2rem;
+        border-left: 1px solid var(--border-color);
+    }
+
+    .status-text {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-text.safe {
+        background: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
+    }
+
+    .status-text.warning {
+        background: rgba(241, 196, 15, 0.1);
+        color: #f1c40f;
+    }
+
+    .status-text.danger {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+    }
+
+    .confidence-score {
+        font-size: 4rem;
+        font-weight: bold;
+        margin: 1rem 0;
+    }
+
+    .details-section {
+        padding: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        color: var(--text-color);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .analysis-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 1rem;
+    }
+
+    .analysis-list li {
+        padding: 1rem;
+        border-radius: 8px;
+        background: var(--bg-color);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .analysis-list li i {
+        font-size: 1.2rem;
+    }
+
+    .scan-actions {
+        padding: 1.5rem;
+        text-align: center;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-color-dark);
+        transform: translateY(-1px);
+    }
+
+    /* Dark mode styles */
+    [data-theme="dark"] .scan-form {
+        background: var(--card-bg);
+    }
+
+    [data-theme="dark"] .form-control {
+        background: var(--bg-color);
+        border-color: var(--border-color);
+        color: var(--text-color);
+    }
+
+    [data-theme="dark"] .form-control:focus {
+        border-color: var(--primary-color);
+    }
+
+    [data-theme="dark"] .result-card {
+        background: var(--card-bg);
+    }
+
+    [data-theme="dark"] .analysis-list li {
+        background: var(--card-bg);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="scan-container">
+    <div class="scan-header">
+        <h1>فحص البريد الإلكتروني</h1>
+        <p class="subtitle">تحليل رسائل البريد الإلكتروني للكشف عن محاولات التصيد الاحتيالي</p>
+    </div>
+
+    {% if not email_res %}
+    <div class="scan-form-container">
+        <form method="POST" action="{{ url_for('email_check') }}" class="scan-form">
+            <div class="form-group">
+                <label for="emailContent">نص البريد الإلكتروني</label>
+                <textarea id="emailContent" name="text" class="form-control" rows="10" 
+                          placeholder="الصق محتوى البريد الإلكتروني هنا..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i>
+                فحص البريد
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if email_res %}
+            <div class="result-card">
+        <div class="results-layout">
+            <div class="status-section">
+                <div class="status-text {% if email_res.probability >= 60 %}safe{% elif email_res.probability >= 50 %}warning{% else %}danger{% endif %}">
+                    {% if email_res.probability >= 60 %}
+                        <i class="fas fa-shield-check"></i> بريد آمن
+                    {% elif email_res.probability >= 50 %}
+                        <i class="fas fa-shield-exclamation"></i> يحتاج مراجعة
+                    {% else %}
+                        <i class="fas fa-shield-exclamation"></i> بريد مشبوه
+                    {% endif %}
+                </div>
+                <div class="confidence-score">
+                    {{ "%.0f"|format(email_res.probability) }}%
+                </div>
+                <p>درجة الأمان</p>
+            </div>
+
+            <div class="details-section">
+                <h3 class="section-title">نتائج التحليل</h3>
+                <ul class="analysis-list">
+                    {% for reason in email_res.reasons %}
+                        <li>
+                            <i class="fas {% if 'تحذير' in reason or 'خطر' in reason %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+                            {{ reason }}
+                        </li>
+                    {% endfor %}
+
+                    {% if email_res.url_results %}
+                        <li>
+                            <i class="fas fa-link"></i>
+                            تم العثور على {{ email_res.url_results|length }} روابط
+                        </li>
+                        {% for url_result in email_res.url_results %}
+                            <li class="{% if url_result.status == 'safe' %}safe{% else %}warning{% endif %}">
+                                <i class="fas {% if url_result.status == 'safe' %}fa-check-circle{% else %}fa-exclamation-triangle{% endif %}"></i>
+                                {{ url_result.url }}: {{ url_result.reason }}
+                            </li>
+                        {% endfor %}
+                    {% endif %}
+                    </ul>
+            </div>
+        </div>
+
+        <div class="scan-actions">
+            <a href="{{ url_for('email_check') }}" class="btn btn-primary">
+                <i class="fas fa-redo"></i>
+                فحص بريد جديد
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // تحسين تجربة المستخدم في نموذج الفحص
+    const form = document.querySelector('.scan-form');
+    if (form) {
+        const textarea = form.querySelector('textarea');
+        if (textarea) {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+        }
+    }
+
+    // مشاركة النتائج
+    function shareResults() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'نتائج فحص البريد الإلكتروني',
+                text: document.querySelector('.status-text').textContent,
+                url: window.location.href
+            })
+            .catch(console.error);
+        } else {
+            alert('مشاركة النتائج غير متاحة في متصفحك');
+        }
+    }
+</script>
+{% endblock %} 

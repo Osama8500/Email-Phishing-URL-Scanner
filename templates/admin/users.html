@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}PhishGuard - إدارة المستخدمين{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="content-card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fas fa-users"></i>
+                جميع المستخدمين
+            </h3>
+            <div class="card-actions">
+                <button class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    إضافة مستخدم جديد
+                </button>
+            </div>
+        </div>
+        <div class="users-list">
+            {% for user in users %}
+            <div class="list-item">
+                <div class="item-info">
+                    <span class="item-title">{{ user.username }}</span>
+                    <span class="item-subtitle">{{ user.email }}</span>
+                </div>
+                <div class="item-actions">
+                    <span class="item-time">{{ user.created_at.strftime('%Y-%m-%d') }}</span>
+                    <div class="btn-group ms-2">
+                        <button class="btn btn-sm btn-outline-primary toggle-admin-btn" data-user-id="{{ user.id }}" data-is-admin="{{ user.is_admin|lower }}">
+                            {% if user.is_admin %}
+                            <i class="fas fa-user-shield"></i> إلغاء المشرف
+                            {% else %}
+                            <i class="fas fa-user-plus"></i> تعيين كمشرف
+                            {% endif %}
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger delete-user-btn" data-user-id="{{ user.id }}">
+                            <i class="fas fa-trash"></i> حذف
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // تفعيل/تعطيل صلاحيات المشرف
+    document.querySelectorAll('.toggle-admin-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            fetch(`/admin/api/user/${userId}/toggle-admin`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.is_admin) {
+                    this.innerHTML = '<i class="fas fa-user-shield"></i> إلغاء المشرف';
+                } else {
+                    this.innerHTML = '<i class="fas fa-user-plus"></i> تعيين كمشرف';
+                }
+                this.dataset.isAdmin = data.is_admin;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
+    // حذف مستخدم
+    document.querySelectorAll('.delete-user-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (confirm('هل أنت متأكد من حذف هذا المستخدم؟')) {
+                const userId = this.dataset.userId;
+                fetch(`/admin/api/user/${userId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        this.closest('.list-item').remove();
+                    } else {
+                        alert(data.error || 'حدث خطأ أثناء حذف المستخدم');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إحصائيات الفحص - PhishGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <main class="main-content">
+        <div class="statistics-container">
+            <div class="statistics-header">
+                <h1>إحصائيات الفحص</h1>
+                <div class="date-filter">
+                    <button class="btn btn-secondary active">اليوم</button>
+                    <button class="btn btn-secondary">الأسبوع</button>
+                    <button class="btn btn-secondary">الشهر</button>
+                    <button class="btn btn-secondary">السنة</button>
+                    <input type="date" class="date-input" />
+                    <button class="btn btn-primary">
+                        <i class="fas fa-sync"></i>
+                        تحديث
+                    </button>
+                </div>
+            </div>
+
+            <!-- إحصائيات عامة -->
+            <div class="stats-overview">
+                <div class="stat-card success">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>فحوصات ناجحة</h3>
+                        <p class="stat-number">{{ successful_scans }}</p>
+                        <span class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            5.2%
+                        </span>
+                    </div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>تحذيرات</h3>
+                        <p class="stat-number">{{ warnings }}</p>
+                        <span class="stat-change negative">
+                            <i class="fas fa-arrow-down"></i>
+                            2.1%
+                        </span>
+                    </div>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-icon">
+                        <i class="fas fa-virus"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>تهديدات</h3>
+                        <p class="stat-number">{{ threats }}</p>
+                        <span class="stat-change negative">
+                            <i class="fas fa-arrow-down"></i>
+                            8.4%
+                        </span>
+                    </div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>معدل الاستجابة</h3>
+                        <p class="stat-number">{{ response_rate }}ms</p>
+                        <span class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            3.7%
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الرسوم البيانية التفصيلية -->
+            <div class="detailed-charts">
+                <div class="chart-card full-width">
+                    <h3>نشاط الفحص على مدار اليوم</h3>
+                    <canvas id="hourlyActivityChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>توزيع أنواع الفحص</h3>
+                    <canvas id="scanTypesChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>معدل النجاح</h3>
+                    <canvas id="successRateChart"></canvas>
+                </div>
+            </div>
+
+            <!-- جدول الإحصائيات التفصيلية -->
+            <div class="detailed-stats">
+                <h2>إحصائيات تفصيلية</h2>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>نوع الفحص</th>
+                            <th>عدد العمليات</th>
+                            <th>نسبة النجاح</th>
+                            <th>متوسط الوقت</th>
+                            <th>التهديدات المكتشفة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in detailed_stats %}
+                        <tr>
+                            <td>{{ stat.type }}</td>
+                            <td>{{ stat.count }}</td>
+                            <td>{{ stat.success_rate }}%</td>
+                            <td>{{ stat.avg_time }}ms</td>
+                            <td>{{ stat.threats }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // رسم بياني للنشاط اليومي
+        const hourlyCtx = document.getElementById('hourlyActivityChart').getContext('2d');
+        new Chart(hourlyCtx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                datasets: [{
+                    label: 'عدد الفحوصات',
+                    data: [30, 25, 20, 15, 10, 8, 12, 20, 35, 45, 50, 55, 60, 58, 52, 48, 45, 40, 38, 35, 30, 28, 25, 22],
+                    borderColor: '#4a90e2',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(74, 144, 226, 0.1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // رسم بياني لأنواع الفحص
+        const typesCtx = document.getElementById('scanTypesChart').getContext('2d');
+        new Chart(typesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['فحص الروابط', 'فحص البريد', 'فحص الملفات'],
+                datasets: [{
+                    data: [45, 35, 20],
+                    backgroundColor: ['#4a90e2', '#2ecc71', '#f1c40f']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // رسم بياني لمعدل النجاح
+        const successCtx = document.getElementById('successRateChart').getContext('2d');
+        new Chart(successCtx, {
+            type: 'bar',
+            data: {
+                labels: ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'],
+                datasets: [{
+                    label: 'معدل النجاح',
+                    data: [95, 92, 88, 95, 90, 87, 93],
+                    backgroundColor: '#2ecc71'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // تحديث الفلاتر
+        document.querySelectorAll('.date-filter .btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.date-filter .btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                // يمكن إضافة منطق تحديث البيانات هنا
+            });
+        });
+    </script>
+</body>
+</html> 

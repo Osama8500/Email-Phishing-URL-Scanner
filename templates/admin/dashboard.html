@@ -1,0 +1,1230 @@
+{% extends "base.html" %}
+
+{% block title %}PhishGuard - لوحة تحكم المشرف{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-container {
+        padding: 2rem;
+        background-color: var(--bg-color);
+    }
+
+    .dashboard-header {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 2rem;
+    }
+
+    .header-content {
+        flex: 1;
+    }
+
+    .dashboard-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .dashboard-subtitle {
+        color: var(--text-color-light);
+        font-size: 1rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid var(--border-color);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .stat-title {
+        color: var(--text-color);
+        font-size: 1.1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .stat-icon.users { background-color: rgba(25, 118, 210, 0.1); color: #1976d2; }
+    .stat-icon.scans { background-color: rgba(76, 175, 80, 0.1); color: #4caf50; }
+    .stat-icon.threats { background-color: rgba(244, 67, 54, 0.1); color: #f44336; }
+    .stat-icon.success { background-color: rgba(156, 39, 176, 0.1); color: #9c27b0; }
+    .stat-icon.support { background-color: rgba(255, 152, 0, 0.1); color: #ff9800; }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--text-color);
+        margin: 0.5rem 0;
+    }
+
+    .stat-subtitle {
+        color: var(--text-color-light);
+        font-size: 0.9rem;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .content-card {
+        background: var(--card-bg);
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        background-color: var(--card-header-bg);
+    }
+
+    .card-title {
+        color: var(--text-color);
+        font-size: 1.2rem;
+        font-weight: 500;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .view-all {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .view-all:hover {
+        background-color: var(--hover-color);
+        transform: translateX(-4px);
+    }
+
+    .list-container {
+        padding: 1rem;
+    }
+
+    .list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: background-color 0.3s ease;
+    }
+
+    .list-item:last-child {
+        border-bottom: none;
+    }
+
+    .list-item:hover {
+        background-color: var(--hover-color);
+    }
+
+    .item-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .item-title {
+        color: var(--text-color);
+        font-weight: 500;
+    }
+
+    .item-subtitle {
+        color: var(--text-color-light);
+        font-size: 0.9rem;
+    }
+
+    .item-time {
+        color: var(--text-color-light);
+        font-size: 0.85rem;
+        background-color: var(--hover-color);
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .status-badge.safe {
+        background-color: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+
+    .status-badge.threat {
+        background-color: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+    }
+
+    .status-badge.answered {
+        background-color: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+
+    .status-badge.pending {
+        background-color: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+    }
+
+    /* Dark mode styles */
+    [data-theme="dark"] {
+        --card-bg: #1a1a2e;
+        --card-header-bg: #151525;
+        --hover-color: rgba(255, 255, 255, 0.05);
+        --border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    [data-theme="dark"] .stat-card,
+    [data-theme="dark"] .content-card {
+        background: var(--card-bg);
+    }
+
+    [data-theme="dark"] .card-header {
+        background-color: var(--card-header-bg);
+    }
+
+    [data-theme="dark"] .stat-value,
+    [data-theme="dark"] .card-title {
+        color: #e0e0e0;
+    }
+
+    [data-theme="dark"] .stat-subtitle,
+    [data-theme="dark"] .item-subtitle {
+        color: #90a4ae;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .modal.show {
+        display: block;
+        opacity: 1;
+    }
+
+    .modal-content {
+        position: relative;
+        background-color: var(--card-bg);
+        margin: 10vh auto;
+        padding: 0;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+    }
+
+    .modal.show .modal-content {
+        transform: translateY(0);
+    }
+
+    .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin: 0;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--text-color-light);
+        cursor: pointer;
+        padding: 0.5rem;
+        transition: color 0.3s ease;
+    }
+
+    .modal-close:hover {
+        color: var(--text-color);
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:hover {
+        border-color: var(--primary-color-light);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(25, 118, 210, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-color-light);
+        opacity: 0.7;
+    }
+
+    /* تصميم خاص بحقل كلمة المرور */
+    .password-field {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-color-light);
+        cursor: pointer;
+        padding: 0.25rem;
+        transition: color 0.3s ease;
+    }
+
+    .password-toggle:hover {
+        color: var(--primary-color);
+    }
+
+    /* تصميم خاص بمربع الاختيار */
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        padding: 0.5rem 0;
+    }
+
+    .form-check input[type="checkbox"] {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 1.25rem;
+        height: 1.25rem;
+        border: 2px solid var(--border-color);
+        border-radius: 4px;
+        background-color: var(--bg-color);
+        cursor: pointer;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .form-check input[type="checkbox"]:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .form-check input[type="checkbox"]:checked::before {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 0.85rem;
+    }
+
+    .form-check input[type="checkbox"]:hover {
+        border-color: var(--primary-color);
+    }
+
+    .form-check-label {
+        color: var(--text-color);
+        font-size: 0.95rem;
+        user-select: none;
+    }
+
+    /* تحسين تصميم الأزرار */
+    .modal-footer {
+        padding: 1.25rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.75rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn i {
+        font-size: 1rem;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-color-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-secondary {
+        background-color: var(--hover-color);
+        color: var(--text-color);
+    }
+
+    .btn-secondary:hover {
+        background-color: var(--border-color);
+        transform: translateY(-1px);
+    }
+
+    /* تحسينات للوضع الليلي */
+    [data-theme="dark"] .form-control {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+        color: var(--text-color-dark);
+    }
+
+    [data-theme="dark"] .form-control:hover {
+        border-color: var(--primary-color-light);
+    }
+
+    [data-theme="dark"] .form-control::placeholder {
+        color: var(--text-color-light-dark);
+    }
+
+    [data-theme="dark"] .form-check input[type="checkbox"] {
+        background-color: var(--card-bg);
+    }
+
+    [data-theme="dark"] .btn-secondary {
+        background-color: var(--card-header-bg);
+        color: var(--text-color-dark);
+    }
+
+    [data-theme="dark"] .btn-secondary:hover {
+        background-color: var(--border-color);
+    }
+
+    /* تحريك النموذج */
+    @keyframes modalShow {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal.show .modal-content {
+        animation: modalShow 0.3s ease forwards;
+    }
+
+    #addUserBtn {
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    #addUserBtn:hover {
+        background-color: var(--primary-color-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    #addUserBtn i {
+        font-size: 1.1rem;
+    }
+
+    .item-stats {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .success-rate {
+        font-size: 0.85rem;
+        color: var(--success-color);
+        background-color: rgba(46, 204, 113, 0.1);
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+    }
+
+    .item-value {
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .support-messages-card {
+        height: 100%;
+    }
+
+    .support-message {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .support-message:hover {
+        background-color: var(--hover-color);
+    }
+
+    .message-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        border-radius: 0.5rem;
+    }
+
+    .view-message-btn {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .reply-btn {
+        background-color: #4caf50;
+        color: white;
+    }
+
+    .no-messages {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-color-light);
+    }
+
+    .no-messages i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Modal Styles */
+    .modal-content {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.5rem;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        border-top: 1px solid var(--border-color);
+        padding: 1.5rem;
+    }
+
+    .original-message {
+        background-color: var(--bg-color);
+        border-radius: 10px;
+        padding: 1rem;
+    }
+
+    #replyText {
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 1rem;
+        resize: vertical;
+    }
+
+    /* Dark mode support */
+    [data-theme="dark"] .original-message {
+        background-color: var(--card-bg);
+    }
+
+    [data-theme="dark"] #replyText {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1 class="dashboard-title">
+                <i class="fas fa-tachometer-alt"></i>
+                لوحة تحكم المشرف
+            </h1>
+            <p class="dashboard-subtitle">مرحباً بك في لوحة التحكم</p>
+        </div>
+        <button id="addUserBtn" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i>
+            إضافة مستخدم جديد
+        </button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon users">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+            <div class="stat-value">{{ total_users }}</div>
+            <div class="stat-title">المستخدمين</div>
+            <div class="stat-subtitle">إجمالي المستخدمين المسجلين</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon scans">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+            <div class="stat-value">{{ total_scans }}</div>
+            <div class="stat-title">عمليات الفحص</div>
+            <div class="stat-subtitle">إجمالي عمليات الفحص</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon threats">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+            </div>
+            <div class="stat-value">{{ total_threats }}</div>
+            <div class="stat-title">التهديدات</div>
+            <div class="stat-subtitle">إجمالي التهديدات المكتشفة</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon success">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+            <div class="stat-value">{{ "%.1f"|format((1 - total_threats/total_scans if total_scans > 0 else 0) * 100) }}%</div>
+            <div class="stat-title">معدل النجاح</div>
+            <div class="stat-subtitle">نسبة الفحوصات الآمنة</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-title">
+                    <div class="stat-icon support">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    رسائل الدعم
+                </div>
+            </div>
+            <div class="stat-value" id="support-count">{{ support_messages_count }}</div>
+            <div class="stat-subtitle">رسائل تحتاج للرد</div>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <div class="content-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-users"></i>
+                    آخر المستخدمين
+                </h3>
+                <a href="{{ url_for('admin_users') }}" class="view-all">
+                    عرض الكل
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </div>
+            <div class="list-container">
+                {% for user in recent_users %}
+                <div class="list-item">
+                    <div class="item-info">
+                        <span class="item-title">{{ user.username }}</span>
+                        <span class="item-subtitle">{{ user.email }}</span>
+                    </div>
+                    <span class="item-time">{{ user.created_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-search"></i>
+                    آخر عمليات الفحص
+                </h3>
+                <a href="{{ url_for('admin_scans') }}" class="view-all">
+                    عرض الكل
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </div>
+            <div class="list-container">
+                {% for scan in recent_scans %}
+                <div class="list-item">
+                    <div class="item-info">
+                        <span class="item-title">{{ scan.scan_type }}</span>
+                        <span class="status-badge {{ 'threat' if scan.is_threat else 'safe' }}">
+                            {{ "تهديد" if scan.is_threat else "آمن" }}
+                        </span>
+                    </div>
+                    <span class="item-time">{{ scan.scan_date.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-pie"></i>
+                    إحصائيات الفحص
+                </h3>
+                <a href="{{ url_for('scan_statistics') }}" class="view-all">
+                    عرض الكل
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </div>
+            <div class="list-container">
+                <div class="list-item">
+                    <span class="item-title">فحص الروابط</span>
+                    <span class="item-value">{{ url_scans }}</span>
+                </div>
+                <div class="list-item">
+                    <span class="item-title">فحص البريد</span>
+                    <span class="item-value">{{ email_scans }}</span>
+                </div>
+                <div class="list-item">
+                    <span class="item-title">فحص الملفات</span>
+                    <span class="item-value">{{ file_scans }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-shield-alt"></i>
+                    التهديدات المكتشفة
+                </h3>
+                <a href="{{ url_for('admin_threats') }}" class="view-all">
+                    عرض الكل
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </div>
+            <div class="list-container">
+                {% for scan in recent_scans if scan.is_threat %}
+                <div class="list-item">
+                    <div class="item-info">
+                        <span class="item-title">{{ scan.scan_type }}</span>
+                        <span class="status-badge threat">{{ scan.threat_level }}</span>
+                    </div>
+                    <span class="item-time">{{ scan.scan_date.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="content-card support-messages-card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-envelope"></i>
+                    رسائل الدعم الفني
+                </h2>
+                <a href="{{ url_for('admin_support') }}" class="view-all">
+                    عرض الكل
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+            </div>
+            <div class="list-container">
+                {% if latest_support_messages %}
+                    {% for message in latest_support_messages %}
+                    <div class="list-item support-message" data-message-id="{{ message.id }}">
+                        <div class="item-info">
+                            <div class="item-title">{{ message.subject }}</div>
+                            <div class="item-subtitle">
+                                <i class="fas fa-user"></i>
+                                {{ message.user.username }}
+                            </div>
+                        </div>
+                        <div class="message-actions">
+                            <span class="status-badge {{ 'answered' if message.status == 'answered' else 'pending' }}">
+                                {{ 'تم الرد' if message.status == 'answered' else 'في انتظار الرد' }}
+                            </span>
+                            <button class="btn btn-primary btn-sm view-message-btn" onclick="viewMessage({{ message.id }})">
+                                <i class="fas fa-eye"></i>
+                                عرض
+                            </button>
+                            <button class="btn btn-success btn-sm reply-btn" onclick="openReplyModal({{ message.id }})">
+                                <i class="fas fa-reply"></i>
+                                رد
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-messages">
+                        <i class="fas fa-inbox"></i>
+                        <p>لا توجد رسائل دعم فني جديدة</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for adding new user -->
+<div id="addUserModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">
+                <i class="fas fa-user-plus"></i>
+                إضافة مستخدم جديد
+            </h5>
+            <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <form id="addUserForm" onsubmit="return handleAddUser(event)">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="username">اسم المستخدم</label>
+                    <input type="text" class="form-control" id="username" name="username" 
+                           placeholder="أدخل اسم المستخدم" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="email">البريد الإلكتروني</label>
+                    <input type="email" class="form-control" id="email" name="email" 
+                           placeholder="أدخل البريد الإلكتروني" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">كلمة المرور</label>
+                    <div class="password-field">
+                        <input type="password" class="form-control" id="password" name="password" 
+                               placeholder="أدخل كلمة المرور" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="confirm_password">تأكيد كلمة المرور</label>
+                    <div class="password-field">
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
+                               placeholder="أعد إدخال كلمة المرور" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('confirm_password')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-check">
+                        <input type="checkbox" name="is_admin" id="is_admin">
+                        <span class="form-check-label">مشرف النظام</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                    إلغاء
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i>
+                    إضافة المستخدم
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal نافذة الرد على الرسالة -->
+<div class="modal fade" id="replyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">الرد على رسالة الدعم</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="original-message mb-4">
+                    <h6>الرسالة الأصلية:</h6>
+                    <div id="originalMessageContent" class="p-3 bg-light rounded"></div>
+                </div>
+                <div class="reply-form">
+                    <textarea id="replyText" class="form-control" rows="5" placeholder="اكتب ردك هنا..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="submitReply()">
+                    <i class="fas fa-paper-plane"></i>
+                    إرسال الرد
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // تحديث الإحصائيات في الوقت الفعلي
+    function updateStats() {
+        fetch('/admin/api/stats')
+            .then(response => response.json())
+            .then(data => {
+                // تحديث الإحصائيات العامة
+                document.querySelectorAll('.stat-card').forEach(card => {
+                    const title = card.querySelector('.stat-title').textContent.trim();
+                    const valueEl = card.querySelector('.stat-value');
+                    
+                    if (title.includes('المستخدمين')) {
+                        valueEl.textContent = data.total_users;
+                    } else if (title.includes('عمليات الفحص')) {
+                        valueEl.textContent = data.total_scans;
+                    } else if (title.includes('التهديدات')) {
+                        valueEl.textContent = data.total_threats;
+                    } else if (title.includes('معدل النجاح')) {
+                        const successRate = ((1 - data.total_threats/data.total_scans) * 100).toFixed(1);
+                        valueEl.textContent = `${successRate}%`;
+                    }
+                });
+
+                // تحديث قائمة آخر المستخدمين
+                const recentUsersContainer = document.querySelector('.content-card:nth-child(1) .list-container');
+                recentUsersContainer.innerHTML = data.recent_users.map(user => `
+                    <div class="list-item">
+                        <div class="item-info">
+                            <span class="item-title">${user.username}</span>
+                            <span class="item-subtitle">${user.email}</span>
+                        </div>
+                        <span class="item-time">${user.created_at}</span>
+                    </div>
+                `).join('');
+
+                // تحديث قائمة آخر عمليات الفحص
+                const recentScansContainer = document.querySelector('.content-card:nth-child(2) .list-container');
+                recentScansContainer.innerHTML = data.recent_scans.map(scan => `
+                    <div class="list-item">
+                        <div class="item-info">
+                            <span class="item-title">${scan.scan_type}</span>
+                            <span class="status-badge ${scan.is_threat ? 'threat' : 'safe'}">
+                                ${scan.is_threat ? 'تهديد' : 'آمن'}
+                            </span>
+                        </div>
+                        <span class="item-time">${scan.scan_date}</span>
+                    </div>
+                `).join('');
+
+                // تحديث إحصائيات الفحص
+                const scanStatsContainer = document.querySelector('.content-card:nth-child(3) .list-container');
+                scanStatsContainer.innerHTML = `
+                    <div class="list-item">
+                        <span class="item-title">فحص الروابط</span>
+                        <div class="item-stats">
+                            <span class="item-value">${data.scan_stats.url.total}</span>
+                            <span class="success-rate">${data.scan_stats.url.success_rate}% نجاح</span>
+                        </div>
+                    </div>
+                    <div class="list-item">
+                        <span class="item-title">فحص البريد</span>
+                        <div class="item-stats">
+                            <span class="item-value">${data.scan_stats.email.total}</span>
+                            <span class="success-rate">${data.scan_stats.email.success_rate}% نجاح</span>
+                        </div>
+                    </div>
+                    <div class="list-item">
+                        <span class="item-title">فحص الملفات</span>
+                        <div class="item-stats">
+                            <span class="item-value">${data.scan_stats.file.total}</span>
+                            <span class="success-rate">${data.scan_stats.file.success_rate}% نجاح</span>
+                        </div>
+                    </div>
+                `;
+
+                // تحديث قائمة التهديدات
+                const threatsContainer = document.querySelector('.content-card:nth-child(4) .list-container');
+                threatsContainer.innerHTML = data.recent_scans
+                    .filter(scan => scan.is_threat)
+                    .map(scan => `
+                        <div class="list-item">
+                            <div class="item-info">
+                                <span class="item-title">${scan.scan_type}</span>
+                                <span class="status-badge threat">${scan.threat_level}</span>
+                            </div>
+                            <span class="item-time">${scan.scan_date}</span>
+                        </div>
+                    `).join('');
+            })
+            .catch(error => console.error('Error updating stats:', error));
+    }
+
+    // تحديث كل 10 ثواني
+    updateStats(); // تحديث فوري عند تحميل الصفحة
+    setInterval(updateStats, 10000);
+});
+
+// تحديث معالج النقر على زر إضافة مستخدم جديد
+document.getElementById('addUserBtn').addEventListener('click', function() {
+    openModal();
+});
+
+// Modal functions
+function openModal() {
+    const modal = document.getElementById('addUserModal');
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    document.getElementById('addUserModal').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+async function handleAddUser(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const data = {
+        username: formData.get('username'),
+        email: formData.get('email'),
+        password: formData.get('password'),
+        confirm_password: formData.get('confirm_password'),
+        is_admin: formData.get('is_admin') === 'on'
+    };
+
+    if (data.password !== data.confirm_password) {
+        alert('كلمات المرور غير متطابقة');
+        return false;
+    }
+
+    try {
+        const response = await fetch('/admin/api/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert('تم إضافة المستخدم بنجاح');
+            closeModal();
+            // تحديث القائمة
+            window.location.reload();
+        } else {
+            alert(result.error || 'حدث خطأ أثناء إضافة المستخدم');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('حدث خطأ أثناء إضافة المستخدم');
+    }
+
+    return false;
+}
+
+// إضافة وظيفة إظهار/إخفاء كلمة المرور
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const icon = input.nextElementSibling.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+let currentMessageId = null;
+
+function viewMessage(messageId) {
+    // تحويل المستخدم إلى صفحة تفاصيل الرسالة
+    window.location.href = `/admin/support#message-${messageId}`;
+}
+
+function openReplyModal(messageId) {
+    currentMessageId = messageId;
+    
+    // جلب تفاصيل الرسالة
+    fetch(`/admin/support/${messageId}/details`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('originalMessageContent').textContent = data.message;
+            $('#replyModal').modal('show');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ أثناء جلب تفاصيل الرسالة');
+        });
+}
+
+function submitReply() {
+    if (!currentMessageId) return;
+    
+    const replyText = document.getElementById('replyText').value.trim();
+    if (!replyText) {
+        alert('الرجاء كتابة رد قبل الإرسال');
+        return;
+    }
+    
+    fetch(`/admin/support/${currentMessageId}/respond`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            response: replyText
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // تحديث حالة الرسالة في الواجهة
+            const messageElement = document.querySelector(`[data-message-id="${currentMessageId}"]`);
+            const statusBadge = messageElement.querySelector('.status-badge');
+            statusBadge.className = 'status-badge answered';
+            statusBadge.textContent = 'تم الرد';
+            
+            // إغلاق النافذة المنبثقة
+            $('#replyModal').modal('hide');
+            
+            // مسح النص
+            document.getElementById('replyText').value = '';
+            
+            // تحديث عداد الرسائل
+            updateSupportCount();
+        } else {
+            alert('حدث خطأ أثناء إرسال الرد');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ أثناء إرسال الرد');
+    });
+}
+
+function updateSupportCount() {
+    fetch('/admin/api/support/count')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('support-count').textContent = data.count;
+        })
+        .catch(error => console.error('Error updating support count:', error));
+}
+
+// تحديث العداد كل دقيقة
+setInterval(updateSupportCount, 60000);
+</script>
+{% endblock %} 

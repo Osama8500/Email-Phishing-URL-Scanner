@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+
+{% block title %}PhishGuard - الملف الشخصي{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        min-height: 100vh;
+        padding: 2rem;
+        background: #f0f7ff;
+    }
+
+    .profile-header {
+        max-width: 1400px;
+        margin: 0 auto 2rem;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: #1976d2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+    }
+
+    .profile-info h1 {
+        color: #1a237e;
+        font-size: 2rem;
+        margin: 0 0 0.5rem;
+    }
+
+    .profile-info p {
+        color: #546e7a;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .profile-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .profile-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-card h2 {
+        color: #1a237e;
+        font-size: 1.5rem;
+        margin: 0 0 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .profile-card h2 i {
+        color: #1976d2;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #1a237e;
+        font-size: 1.1rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #1976d2;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+    }
+
+    .profile-btn {
+        padding: 0.75rem 1.5rem;
+        background: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .profile-btn:hover {
+        background: #1565c0;
+        transform: translateY(-2px);
+    }
+
+    .profile-btn.danger {
+        background: #f44336;
+    }
+
+    .profile-btn.danger:hover {
+        background: #d32f2f;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .stat-item {
+        background: rgba(25, 118, 210, 0.1);
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .stat-item .number {
+        font-size: 2rem;
+        color: #1976d2;
+        font-weight: bold;
+    }
+
+    .stat-item .label {
+        color: #546e7a;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .activity-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(25, 118, 210, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #1976d2;
+    }
+
+    .activity-details h3 {
+        margin: 0;
+        color: #1a237e;
+        font-size: 1.1rem;
+    }
+
+    .activity-details p {
+        margin: 0.25rem 0 0;
+        color: #546e7a;
+        font-size: 0.9rem;
+    }
+
+    /* Dark mode styles */
+    [data-theme="dark"] .profile-container {
+        background: #1a1a2e;
+    }
+
+    [data-theme="dark"] .profile-header,
+    [data-theme="dark"] .profile-card {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    [data-theme="dark"] .profile-info h1 {
+        color: #90caf9;
+    }
+
+    [data-theme="dark"] .profile-info p {
+        color: #b0bec5;
+    }
+
+    [data-theme="dark"] .profile-card h2 {
+        color: #90caf9;
+    }
+
+    [data-theme="dark"] .form-group label {
+        color: #90caf9;
+    }
+
+    [data-theme="dark"] .form-control {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: #e0e0e0;
+    }
+
+    [data-theme="dark"] .stat-item {
+        background: rgba(25, 118, 210, 0.2);
+    }
+
+    [data-theme="dark"] .activity-item {
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    [data-theme="dark"] .activity-details h3 {
+        color: #90caf9;
+    }
+
+    [data-theme="dark"] .activity-details p {
+        color: #b0bec5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <div class="profile-info">
+            <h1>{{ user.username }}</h1>
+            <p>{{ user.email }}</p>
+            <p>عضو منذ {{ user.created_at.strftime('%Y-%m-%d') }}</p>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <div class="profile-card">
+            <h2>
+                <i class="fas fa-chart-line"></i>
+                إحصائيات النشاط
+            </h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="number">150</div>
+                    <div class="label">عمليات فحص</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">12</div>
+                    <div class="label">تهديدات تم اكتشافها</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">98%</div>
+                    <div class="label">نسبة الدقة</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-card">
+            <h2>
+                <i class="fas fa-user-edit"></i>
+                تعديل الملف الشخصي
+            </h2>
+            <form method="POST" action="{{ url_for('profile') }}">
+                <div class="form-group">
+                    <label for="username">اسم المستخدم</label>
+                    <input type="text" id="username" name="username" class="form-control" value="{{ user.username }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">البريد الإلكتروني</label>
+                    <input type="email" id="email" name="email" class="form-control" value="{{ user.email }}" required>
+                </div>
+
+                <button type="submit" class="profile-btn">
+                    <i class="fas fa-save"></i>
+                    حفظ التغييرات
+                </button>
+            </form>
+        </div>
+
+        <div class="profile-card">
+            <h2>
+                <i class="fas fa-shield-alt"></i>
+                الأمان
+            </h2>
+            <form method="POST" action="{{ url_for('profile') }}">
+                <div class="form-group">
+                    <label for="current_password">كلمة المرور الحالية</label>
+                    <input type="password" id="current_password" name="current_password" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="new_password">كلمة المرور الجديدة</label>
+                    <input type="password" id="new_password" name="new_password" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">تأكيد كلمة المرور الجديدة</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                </div>
+
+                <button type="submit" class="profile-btn">
+                    <i class="fas fa-key"></i>
+                    تغيير كلمة المرور
+                </button>
+            </form>
+        </div>
+
+        <div class="profile-card">
+            <h2>
+                <i class="fas fa-history"></i>
+                آخر النشاطات
+            </h2>
+            <ul class="activity-list">
+                <li class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="activity-details">
+                        <h3>فحص رابط</h3>
+                        <p>منذ 5 دقائق</p>
+                    </div>
+                </li>
+                <li class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="activity-details">
+                        <h3>فحص بريد إلكتروني</h3>
+                        <p>منذ ساعة</p>
+                    </div>
+                </li>
+                <li class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="activity-details">
+                        <h3>تم اكتشاف تهديد</h3>
+                        <p>منذ يومين</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="profile-card">
+            <h2>
+                <i class="fas fa-cog"></i>
+                الإعدادات
+            </h2>
+            <form method="POST" action="{{ url_for('profile') }}">
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="email_notifications" checked>
+                        تفعيل الإشعارات عبر البريد الإلكتروني
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="two_factor" checked>
+                        تفعيل المصادقة الثنائية
+                    </label>
+                </div>
+
+                <button type="submit" class="profile-btn">
+                    <i class="fas fa-save"></i>
+                    حفظ الإعدادات
+                </button>
+            </form>
+
+            <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
+
+            <button type="button" class="profile-btn danger">
+                <i class="fas fa-trash-alt"></i>
+                حذف الحساب
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %} 

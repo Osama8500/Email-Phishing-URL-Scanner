@@ -1,0 +1,17 @@
+# روابط هوموغراف بأحرف كيريلية ويونيكود مشابهة للحروف اللاتينية
+https://www.аррӏе.com/          # بديل apple.com (أحرف: а, р, ӏ)
+https://www.gооgle.com/         # بديل google.com (حرف о كيريلي)
+https://www.аdоbе.com/          # بديل adobe.com (أحرف а, о, е كيريلية)
+https://www.mісrоsоft.com/      # بديل microsoft.com (أحرف і, с, о)
+https://www.рayраl.com/         # بديل paypal.com (أحرف р, а كيريلية)
+https://www.tesӏa.com/          # بديل tesla.com (حرف ӏ بديل l)
+https://www.ebау.com/           # بديل ebay.com (حرف а كيريلي)
+https://www.сisсo.com/          # بديل cisco.com (حرف с كيريلي)
+https://www.νisa.com/           # بديل visa.com (حرف ν يوناني)
+
+# روابط هوموغراف بأحرف يونيكود أخرى
+https://www.gοοgle.com/         # بديل google.com (حرف ο يوناني)
+https://www.wikipediа.org/      # بديل wikipedia.org (حرف а كيريلي)
+https://www.lіnkedin.com/       # بديل linkedin.com (حرف і كيريلي)
+https://www.twіtter.com/        # بديل twitter.com (حرف і كيريلي)
+https://www.ԁell.com/           # بديل dell.com (حرف ԁ يونيكود)

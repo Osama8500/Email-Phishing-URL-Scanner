@@ -1,0 +1,562 @@
+{% extends "admin/base.html" %}
+
+{% block title %}إدارة الدعم الفني - PhishGuard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .support-container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .support-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .support-header h1 {
+        margin: 0;
+        color: var(--text-color);
+        font-size: 1.8rem;
+    }
+
+    .support-stats {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .stat-card {
+        background: var(--container-bg);
+        padding: 1rem;
+        border-radius: 10px;
+        min-width: 150px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .stat-card h4 {
+        margin: 0;
+        color: var(--text-color-light);
+        font-size: 0.9rem;
+    }
+
+    .stat-card .number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin: 0.5rem 0;
+    }
+
+    .messages-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .message-card {
+        background: var(--container-bg);
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .message-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .message-title {
+        margin: 0;
+        font-size: 1.1rem;
+        color: var(--text-color);
+        font-weight: 600;
+    }
+
+    .message-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.5rem;
+    }
+
+    .message-date {
+        font-size: 0.85rem;
+        color: var(--text-color-light);
+    }
+
+    .message-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .status-pending {
+        background: rgba(241, 196, 15, 0.1);
+        color: #f1c40f;
+    }
+
+    .status-in-progress {
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+    }
+
+    .status-answered {
+        background: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
+    }
+
+    .message-content {
+        color: var(--text-color);
+        margin-bottom: 1rem;
+        line-height: 1.5;
+        max-height: 4.5em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+
+    .message-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .user-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+
+    .user-name {
+        font-size: 0.9rem;
+        color: var(--text-color);
+    }
+
+    .message-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-action {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-chat {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-chat:hover {
+        background: var(--primary-color-dark);
+    }
+
+    .chat-container {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 350px;
+        height: 500px;
+        background: var(--container-bg);
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        overflow: hidden;
+        flex-direction: column;
+    }
+
+    .chat-header {
+        padding: 1rem;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chat-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .chat-close {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 1.2rem;
+        padding: 0.25rem;
+    }
+
+    .chat-messages {
+        flex: 1;
+        padding: 1rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .chat-message {
+        max-width: 80%;
+        padding: 0.75rem 1rem;
+        border-radius: 15px;
+        position: relative;
+    }
+
+    .chat-message.sent {
+        background: var(--primary-color);
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 5px;
+    }
+
+    .chat-message.received {
+        background: var(--hover-color);
+        color: var(--text-color);
+        margin-right: auto;
+        border-bottom-left-radius: 5px;
+    }
+
+    .message-time {
+        font-size: 0.75rem;
+        opacity: 0.8;
+        margin-top: 0.25rem;
+        text-align: right;
+    }
+
+    .chat-input {
+        padding: 1rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .chat-input textarea {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        resize: none;
+        height: 40px;
+        line-height: 20px;
+        font-family: inherit;
+        background: var(--container-bg);
+        color: var(--text-color);
+    }
+
+    .chat-input textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    .send-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .send-btn:hover {
+        background: var(--primary-color-dark);
+    }
+
+    .send-btn:disabled {
+        background: var(--border-color);
+        cursor: not-allowed;
+    }
+
+    .no-messages {
+        text-align: center;
+        padding: 3rem;
+        background: var(--container-bg);
+        border-radius: 15px;
+        border: 2px dashed var(--border-color);
+    }
+
+    .no-messages i {
+        font-size: 3rem;
+        color: var(--text-color-light);
+        margin-bottom: 1rem;
+    }
+
+    .no-messages p {
+        color: var(--text-color);
+        font-size: 1.2rem;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .messages-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .chat-container {
+            width: 100%;
+            height: 100%;
+            bottom: 0;
+            right: 0;
+            border-radius: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="support-container">
+    <div class="support-header">
+        <h1>إدارة رسائل الدعم الفني</h1>
+        <div class="support-stats">
+            <div class="stat-card">
+                <h4>الرسائل الجديدة</h4>
+                <div class="number">{{ messages|selectattr('status', 'equalto', 'pending')|list|length }}</div>
+            </div>
+            <div class="stat-card">
+                <h4>قيد المعالجة</h4>
+                <div class="number">{{ messages|selectattr('status', 'equalto', 'in_progress')|list|length }}</div>
+            </div>
+            <div class="stat-card">
+                <h4>تم الرد</h4>
+                <div class="number">{{ messages|selectattr('status', 'equalto', 'answered')|list|length }}</div>
+            </div>
+        </div>
+    </div>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="messages-grid">
+        {% if messages %}
+            {% for message in messages|sort(attribute='created_at', reverse=true) %}
+            <div class="message-card" data-message-id="{{ message.id }}">
+                <div class="message-header">
+                    <h3 class="message-title">{{ message.subject }}</h3>
+                    <div class="message-meta">
+                        <span class="message-date">{{ message.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                        <span class="message-status status-{{ message.status }}">
+                            {% if message.status == 'pending' %}
+                            في انتظار الرد
+                            {% elif message.status == 'in_progress' %}
+                            جاري المعالجة
+                            {% else %}
+                            تم الرد
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="message-content">
+                    {{ message.message }}
+                </div>
+                <div class="message-footer">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            {{ message.user.username[0]|upper }}
+                        </div>
+                        <span class="user-name">{{ message.user.username }}</span>
+                    </div>
+                    <div class="message-actions">
+                        <button class="btn-action btn-chat" onclick="openChat({{ message.id }}, '{{ message.subject }}')">
+                            <i class="fas fa-comments"></i>
+                            فتح المحادثة
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-messages">
+                <i class="fas fa-inbox"></i>
+                <p>لا توجد رسائل دعم فني حالياً</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- نافذة المحادثة -->
+<div id="chat-window" class="chat-container">
+    <div class="chat-header">
+        <h3 class="chat-title"></h3>
+        <button class="chat-close" onclick="closeChat()">×</button>
+    </div>
+    <div class="chat-messages"></div>
+    <div class="chat-input">
+        <textarea placeholder="اكتب رسالتك هنا..." onkeydown="handleKeyPress(event)"></textarea>
+        <button class="send-btn" onclick="sendMessage()">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+let currentMessageId = null;
+let messageUpdateInterval = null;
+
+function openChat(messageId, subject) {
+    currentMessageId = messageId;
+    const chatWindow = document.getElementById('chat-window');
+    chatWindow.style.display = 'flex';
+    chatWindow.querySelector('.chat-title').textContent = subject;
+    loadMessages();
+    
+    // بدء تحديث الرسائل كل 5 ثواني
+    if (messageUpdateInterval) {
+        clearInterval(messageUpdateInterval);
+    }
+    messageUpdateInterval = setInterval(loadMessages, 5000);
+}
+
+function closeChat() {
+    document.getElementById('chat-window').style.display = 'none';
+    if (messageUpdateInterval) {
+        clearInterval(messageUpdateInterval);
+        messageUpdateInterval = null;
+    }
+    currentMessageId = null;
+}
+
+function loadMessages() {
+    if (!currentMessageId) return;
+    
+    fetch(`/support/chat/${currentMessageId}/messages`)
+        .then(response => response.json())
+        .then(data => {
+            const messagesContainer = document.querySelector('.chat-messages');
+            messagesContainer.innerHTML = '';
+            
+            data.messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-message ${msg.sender_id == {{ session.user_id }} ? 'sent' : 'received'}`;
+                messageDiv.innerHTML = `
+                    <div class="message-content">${msg.message}</div>
+                    <div class="message-time">
+                        ${msg.sender_name} - ${msg.created_at}
+                        ${!msg.is_read && msg.sender_id == {{ session.user_id }} ? '<i class="fas fa-check"></i>' : ''}
+                    </div>
+                `;
+                messagesContainer.appendChild(messageDiv);
+            });
+            
+            // تمرير إلى آخر رسالة
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // تحديث حالة القراءة
+            markMessagesAsRead();
+        })
+        .catch(error => console.error('Error loading messages:', error));
+}
+
+function sendMessage() {
+    if (!currentMessageId) return;
+    
+    const textarea = document.querySelector('.chat-input textarea');
+    const message = textarea.value.trim();
+    if (!message) return;
+    
+    const sendBtn = document.querySelector('.send-btn');
+    sendBtn.disabled = true;
+    
+    fetch(`/support/chat/${currentMessageId}/send`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            textarea.value = '';
+            loadMessages();
+        } else {
+            alert('حدث خطأ أثناء إرسال الرسالة');
+        }
+    })
+    .catch(error => {
+        console.error('Error sending message:', error);
+        alert('حدث خطأ أثناء إرسال الرسالة');
+    })
+    .finally(() => {
+        sendBtn.disabled = false;
+    });
+}
+
+function handleKeyPress(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+}
+
+function markMessagesAsRead() {
+    if (!currentMessageId) return;
+    
+    fetch(`/support/chat/${currentMessageId}/mark-read`, {
+        method: 'POST'
+    }).catch(error => console.error('Error marking messages as read:', error));
+}
+
+// إغلاق المحادثة عند النقر خارجها
+document.addEventListener('click', function(event) {
+    const chatWindow = document.getElementById('chat-window');
+    if (!chatWindow.contains(event.target) && 
+        !event.target.matches('.btn-chat') && 
+        chatWindow.style.display === 'flex') {
+        closeChat();
+    }
+});
+</script>
+{% endblock %} 

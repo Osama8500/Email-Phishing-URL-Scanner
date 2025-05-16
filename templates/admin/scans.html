@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}PhishGuard - سجل عمليات الفحص{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="content-card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fas fa-search"></i>
+                جميع عمليات الفحص
+            </h3>
+        </div>
+        <div class="scans-list">
+            {% for scan in scans %}
+            <div class="list-item">
+                <div class="item-info">
+                    <span class="item-title">{{ scan.scan_type }}</span>
+                    <span class="item-subtitle">{{ "تهديد" if scan.is_threat else "آمن" }}</span>
+                </div>
+                <div class="item-actions">
+                    <span class="item-time">{{ scan.scan_date.strftime('%Y-%m-%d %H:%M') }}</span>
+                    <button class="btn btn-sm btn-outline-info ms-2">التفاصيل</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %} 
