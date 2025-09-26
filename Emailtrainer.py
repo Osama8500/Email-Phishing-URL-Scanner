@@ -67,7 +67,7 @@ print("Classification Report:")
 print(classification_report(y_test, y_pred, target_names=['ham', 'spam']))
 
 # 13. Save the trained model and vectorizer
-joblib.dump(model, 'spam_classifier_model.pkl')
+joblib.dump(model, 'spam_model.pkl')
 joblib.dump(vectorizer, 'vector.pkl')
 
 print("Training complete. Model and vectorizer saved.")

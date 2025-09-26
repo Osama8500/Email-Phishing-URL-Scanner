@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block title %}PhishGuard - فحص البريد الإلكتروني{% endblock %}
@@ -207,6 +208,12 @@
     [data-theme="dark"] .analysis-list li {
         background: var(--card-bg);
     }
+    .analysis-list li.positive i { color: #2ecc71; }
+    .analysis-list li.positive { background: rgba(46, 204, 113, 0.1); }
+    .analysis-list li.negative i { color: #e74c3c; }
+    .analysis-list li.negative { background: rgba(231, 76, 60, 0.1); }
+    .analysis-list li.info i { color: #3498db; }
+    .analysis-list li.info { background: rgba(52, 152, 219, 0.1); }
 </style>
 {% endblock %}
 
@@ -222,8 +229,7 @@
         <form method="POST" action="{{ url_for('email_check') }}" class="scan-form">
             <div class="form-group">
                 <label for="emailContent">نص البريد الإلكتروني</label>
-                <textarea id="emailContent" name="text" class="form-control" rows="10" 
-                          placeholder="الصق محتوى البريد الإلكتروني هنا..." required></textarea>
+                <textarea id="emailContent" name="text" class="form-control" rows="10" placeholder="الصق محتوى البريد الإلكتروني هنا..." required>{{ request.form.text or '' }}</textarea>
             </div>
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-search"></i>
@@ -234,51 +240,66 @@
     {% endif %}
 
     {% if email_res %}
-            <div class="result-card">
+    <div class="result-card">
         <div class="results-layout">
             <div class="status-section">
-                <div class="status-text {% if email_res.probability >= 60 %}safe{% elif email_res.probability >= 50 %}warning{% else %}danger{% endif %}">
+                <div class="status-text {% if email_res.probability >= 60 %}safe{% else %}danger{% endif %}">
                     {% if email_res.probability >= 60 %}
                         <i class="fas fa-shield-check"></i> بريد آمن
-                    {% elif email_res.probability >= 50 %}
-                        <i class="fas fa-shield-exclamation"></i> يحتاج مراجعة
                     {% else %}
                         <i class="fas fa-shield-exclamation"></i> بريد مشبوه
                     {% endif %}
                 </div>
                 <div class="confidence-score">
-                    {{ "%.0f"|format(email_res.probability) }}%
+                    {{ "%0.0f"|format(email_res.probability) }}%
                 </div>
                 <p>درجة الأمان</p>
             </div>
 
             <div class="details-section">
-                <h3 class="section-title">نتائج التحليل</h3>
+                <h3 class="section-title">تفاصيل درجة الأمان وتحليل المحتوى</h3>
                 <ul class="analysis-list">
                     {% for reason in email_res.reasons %}
-                        <li>
-                            <i class="fas {% if 'تحذير' in reason or 'خطر' in reason %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
-                            {{ reason }}
-                        </li>
+                    {% set cls = 'info' %}
+                    {% if reason.startswith('+') %}
+                        {% set cls = 'positive' %}
+                    {% elif reason.startswith('-') %}
+                        {% set cls = 'negative' %}
+                    {% elif 'تحذير' in reason or 'مشبوه' in reason %}
+                        {% set cls = 'negative' %}
+                    {% endif %}
+                    <li class="{{ cls }}">
+                        <i class="fas {% if cls == 'positive' %}fa-arrow-up{% elif cls == 'negative' %}fa-arrow-down{% else %}fa-info-circle{% endif %}"></i>
+                        {{ reason }}
+                    </li>
                     {% endfor %}
+                </ul>
 
-                    {% if email_res.url_results %}
-                        <li>
-                            <i class="fas fa-link"></i>
-                            تم العثور على {{ email_res.url_results|length }} روابط
-                        </li>
+                {% if email_res.url_results %}
+                <div class="url-results-section">
+                    <h3 class="section-title">تفاصيل فحص الروابط</h3>
+                    <ul class="analysis-list">
                         {% for url_result in email_res.url_results %}
                             <li class="{% if url_result.status == 'safe' %}safe{% else %}warning{% endif %}">
                                 <i class="fas {% if url_result.status == 'safe' %}fa-check-circle{% else %}fa-exclamation-triangle{% endif %}"></i>
-                                {{ url_result.url }}: {{ url_result.reason }}
+                                <div class="url-item">
+                                    <span class="url-text">{{ url_result.url }}</span>
+                                    <span class="url-prob">({{ url_result.probability }}% أمان)</span>
+                                </div>
+                                <div class="url-reason">{{ url_result.reason }}</div>
                             </li>
                         {% endfor %}
-                    {% endif %}
                     </ul>
+                </div>
+                {% endif %}
             </div>
         </div>
 
         <div class="scan-actions">
+            <button class="btn btn-primary" onclick="saveScanReport()">
+                <i class="fas fa-download"></i>
+                حفظ التقرير
+            </button>
             <a href="{{ url_for('email_check') }}" class="btn btn-primary">
                 <i class="fas fa-redo"></i>
                 فحص بريد جديد
@@ -291,30 +312,34 @@
 
 {% block extra_js %}
 <script>
-    // تحسين تجربة المستخدم في نموذج الفحص
+    // تكبير textarea أوتوماتيكياً
     const form = document.querySelector('.scan-form');
     if (form) {
         const textarea = form.querySelector('textarea');
-        if (textarea) {
-            textarea.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = (this.scrollHeight) + 'px';
-            });
-        }
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
     }
 
-    // مشاركة النتائج
-    function shareResults() {
-        if (navigator.share) {
-            navigator.share({
-                title: 'نتائج فحص البريد الإلكتروني',
-                text: document.querySelector('.status-text').textContent,
-                url: window.location.href
-            })
-            .catch(console.error);
-        } else {
-            alert('مشاركة النتائج غير متاحة في متصفحك');
-        }
+    // حفظ تقرير الفحص
+    function saveScanReport() {
+        const original = document.getElementById('originalEmail').innerText;
+        const details = document.getElementById('resultDetails').innerText;
+        const content = [];
+        content.push('نص البريد الإلكتروني:\n' + original + '\n');
+        content.push('--- نتائج التحليل ---\n' + details);
+
+        const blob = new Blob([content.join('\n')], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `phishguard-email-report-${Date.now()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 </script>
-{% endblock %} 
+{% endblock %}
+

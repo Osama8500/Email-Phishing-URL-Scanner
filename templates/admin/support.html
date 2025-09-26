@@ -4,23 +4,48 @@
 
 {% block extra_css %}
 <style>
+    :root {
+        --support-primary: var(--primary-color, #3498db);
+        --support-primary-dark: var(--primary-color-dark, #2980b9);
+        --support-success: #2ecc71;
+        --support-warning: #f1c40f;
+        --support-info: #3498db;
+    }
+
+    .main-content {
+        margin-top: 100px;
+        min-height: calc(100vh - 100px);
+    }
+
     .support-container {
-        padding: 2rem;
         max-width: 1200px;
         margin: 0 auto;
+        padding: 2rem;
     }
 
     .support-header {
+        background: var(--container-bg);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 2rem;
     }
 
     .support-header h1 {
         margin: 0;
         color: var(--text-color);
-        font-size: 1.8rem;
+        font-size: 2.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .support-header h1 i {
+        color: var(--support-primary);
     }
 
     .support-stats {
@@ -30,21 +55,27 @@
 
     .stat-card {
         background: var(--container-bg);
-        padding: 1rem;
-        border-radius: 10px;
-        min-width: 150px;
+        padding: 1.5rem;
+        border-radius: 15px;
+        min-width: 180px;
         text-align: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
     }
 
     .stat-card h4 {
         margin: 0;
         color: var(--text-color-light);
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 
     .stat-card .number {
-        font-size: 1.5rem;
+        font-size: 2rem;
         font-weight: bold;
         color: var(--primary-color);
         margin: 0.5rem 0;
@@ -52,7 +83,7 @@
 
     .messages-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
         gap: 1.5rem;
         margin-top: 2rem;
     }
@@ -61,16 +92,14 @@
         background: var(--container-bg);
         border-radius: 15px;
         padding: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         transition: all 0.3s ease;
         border: 1px solid var(--border-color);
-        position: relative;
-        overflow: hidden;
     }
 
     .message-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
     }
 
     .message-header {
@@ -82,7 +111,7 @@
 
     .message-title {
         margin: 0;
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         color: var(--text-color);
         font-weight: 600;
     }
@@ -95,14 +124,14 @@
     }
 
     .message-date {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         color: var(--text-color-light);
     }
 
     .message-status {
         padding: 0.25rem 0.75rem;
         border-radius: 50px;
-        font-size: 0.8rem;
+        font-size: 0.9rem;
         font-weight: 500;
     }
 
@@ -111,7 +140,7 @@
         color: #f1c40f;
     }
 
-    .status-in-progress {
+    .status-in_progress {
         background: rgba(52, 152, 219, 0.1);
         color: #3498db;
     }
@@ -124,13 +153,7 @@
     .message-content {
         color: var(--text-color);
         margin-bottom: 1rem;
-        line-height: 1.5;
-        max-height: 4.5em;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
+        line-height: 1.6;
     }
 
     .message-footer {
@@ -145,29 +168,24 @@
     .user-info {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
     }
 
     .user-avatar {
-        width: 30px;
-        height: 30px;
+        width: 35px;
+        height: 35px;
         border-radius: 50%;
         background: var(--primary-color);
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 
     .user-name {
-        font-size: 0.9rem;
+        font-size: 1rem;
         color: var(--text-color);
-    }
-
-    .message-actions {
-        display: flex;
-        gap: 0.5rem;
     }
 
     .btn-action {
@@ -189,6 +207,7 @@
 
     .btn-chat:hover {
         background: var(--primary-color-dark);
+        transform: translateY(-2px);
     }
 
     .chat-container {
@@ -204,6 +223,7 @@
         z-index: 1000;
         overflow: hidden;
         flex-direction: column;
+        border: 1px solid var(--border-color);
     }
 
     .chat-header {
@@ -221,15 +241,6 @@
         font-weight: 600;
     }
 
-    .chat-close {
-        background: none;
-        border: none;
-        color: white;
-        cursor: pointer;
-        font-size: 1.2rem;
-        padding: 0.25rem;
-    }
-
     .chat-messages {
         flex: 1;
         padding: 1rem;
@@ -244,6 +255,7 @@
         padding: 0.75rem 1rem;
         border-radius: 15px;
         position: relative;
+        line-height: 1.5;
     }
 
     .chat-message.sent {
@@ -260,18 +272,11 @@
         border-bottom-left-radius: 5px;
     }
 
-    .message-time {
-        font-size: 0.75rem;
-        opacity: 0.8;
-        margin-top: 0.25rem;
-        text-align: right;
-    }
-
     .chat-input {
         padding: 1rem;
         border-top: 1px solid var(--border-color);
         display: flex;
-        gap: 0.5rem;
+        gap: 0.75rem;
     }
 
     .chat-input textarea {
@@ -321,6 +326,7 @@
         background: var(--container-bg);
         border-radius: 15px;
         border: 2px dashed var(--border-color);
+        margin: 2rem 0;
     }
 
     .no-messages i {
@@ -336,6 +342,17 @@
     }
 
     @media (max-width: 768px) {
+        .support-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .support-stats {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
         .messages-grid {
             grid-template-columns: 1fr;
         }
@@ -354,7 +371,10 @@
 {% block content %}
 <div class="support-container">
     <div class="support-header">
-        <h1>إدارة رسائل الدعم الفني</h1>
+        <h1>
+            <i class="fas fa-headset"></i>
+            إدارة رسائل الدعم الفني
+        </h1>
         <div class="support-stats">
             <div class="stat-card">
                 <h4>الرسائل الجديدة</h4>
@@ -452,7 +472,6 @@ function openChat(messageId, subject) {
     chatWindow.querySelector('.chat-title').textContent = subject;
     loadMessages();
     
-    // بدء تحديث الرسائل كل 5 ثواني
     if (messageUpdateInterval) {
         clearInterval(messageUpdateInterval);
     }
@@ -476,24 +495,32 @@ function loadMessages() {
         .then(data => {
             const messagesContainer = document.querySelector('.chat-messages');
             messagesContainer.innerHTML = '';
+            const userId = {{ session.user_id }};
             
             data.messages.forEach(msg => {
                 const messageDiv = document.createElement('div');
-                messageDiv.className = `chat-message ${msg.sender_id == {{ session.user_id }} ? 'sent' : 'received'}`;
-                messageDiv.innerHTML = `
-                    <div class="message-content">${msg.message}</div>
-                    <div class="message-time">
-                        ${msg.sender_name} - ${msg.created_at}
-                        ${!msg.is_read && msg.sender_id == {{ session.user_id }} ? '<i class="fas fa-check"></i>' : ''}
-                    </div>
-                `;
+                messageDiv.className = `chat-message ${msg.sender_id === userId ? 'sent' : 'received'}`;
+                
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                messageContent.textContent = msg.message;
+                
+                const messageTime = document.createElement('div');
+                messageTime.className = 'message-time';
+                messageTime.textContent = `${msg.sender_name} - ${msg.created_at}`;
+                
+                if (!msg.is_read && msg.sender_id === userId) {
+                    const checkIcon = document.createElement('i');
+                    checkIcon.className = 'fas fa-check';
+                    messageTime.appendChild(checkIcon);
+                }
+                
+                messageDiv.appendChild(messageContent);
+                messageDiv.appendChild(messageTime);
                 messagesContainer.appendChild(messageDiv);
             });
             
-            // تمرير إلى آخر رسالة
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            
-            // تحديث حالة القراءة
             markMessagesAsRead();
         })
         .catch(error => console.error('Error loading messages:', error));
@@ -509,29 +536,31 @@ function sendMessage() {
     const sendBtn = document.querySelector('.send-btn');
     sendBtn.disabled = true;
     
-    fetch(`/support/chat/${currentMessageId}/send`, {
+    const requestOptions = {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ message })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            textarea.value = '';
-            loadMessages();
-        } else {
+    };
+    
+    fetch(`/support/chat/${currentMessageId}/send`, requestOptions)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                textarea.value = '';
+                loadMessages();
+            } else {
+                alert('حدث خطأ أثناء إرسال الرسالة');
+            }
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
             alert('حدث خطأ أثناء إرسال الرسالة');
-        }
-    })
-    .catch(error => {
-        console.error('Error sending message:', error);
-        alert('حدث خطأ أثناء إرسال الرسالة');
-    })
-    .finally(() => {
-        sendBtn.disabled = false;
-    });
+        })
+        .finally(() => {
+            sendBtn.disabled = false;
+        });
 }
 
 function handleKeyPress(event) {
@@ -544,12 +573,14 @@ function handleKeyPress(event) {
 function markMessagesAsRead() {
     if (!currentMessageId) return;
     
-    fetch(`/support/chat/${currentMessageId}/mark-read`, {
+    const requestOptions = {
         method: 'POST'
-    }).catch(error => console.error('Error marking messages as read:', error));
+    };
+    
+    fetch(`/support/chat/${currentMessageId}/mark-read`, requestOptions)
+        .catch(error => console.error('Error marking messages as read:', error));
 }
 
-// إغلاق المحادثة عند النقر خارجها
 document.addEventListener('click', function(event) {
     const chatWindow = document.getElementById('chat-window');
     if (!chatWindow.contains(event.target) && 

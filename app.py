@@ -24,6 +24,9 @@ import hashlib
 from sqlalchemy import func
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+import shutil
+
+
 
 # Configure logging
 logging.basicConfig(
@@ -91,16 +94,26 @@ class User(db.Model, UserMixin):
         return True
 
 class Notification(db.Model):
+    """نموذج الإشعارات"""
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    title = db.Column(db.String(200), nullable=False)
-    message = db.Column(db.String(500), nullable=False)
-    type = db.Column(db.String(50), nullable=False)  # 'support_reply', 'system', etc.
-    reference_id = db.Column(db.Integer, nullable=True)  # يمكن أن يكون معرف رسالة الدعم الفني
+    title = db.Column(db.String(100), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    type = db.Column(db.String(20), default='system')  # system, threat, scan, security
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    user = db.relationship('User', backref=db.backref('notifications', lazy=True))
+    reference_id = db.Column(db.Integer)  # للإشارة إلى عنصر مرتبط (مثل رسالة دعم فني)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'message': self.message,
+            'type': self.type,
+            'is_read': self.is_read,
+            'created_at': self.created_at,
+            'reference_id': self.reference_id
+        }
 
 class ChatMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -135,23 +148,28 @@ class SupportResponse(db.Model):
 
 # Create database tables
 with app.app_context():
-    # Drop all existing tables
-    db.drop_all()
-    # Create all tables
-    db.create_all()
-    
-    # إنشاء مستخدم Osama كمشرف إذا لم يكن موجوداً
-    admin_user = User.query.filter_by(username="Osama").first()
-    if not admin_user:
-        admin_user = User(
-            username="Osama",
-            email="osama@example.com",
-            is_admin=True
-        )
-        admin_user.set_password("123456")
-        db.session.add(admin_user)
-        db.session.commit()
-        print("تم إنشاء حساب المشرف Osama")
+    try:
+        # إنشاء جميع الجداول إذا لم تكن موجودة
+        db.create_all()
+        
+        # إنشاء مستخدم Osama كمشرف إذا لم يكن موجوداً
+        admin_user = User.query.filter_by(username="Osama").first()
+        if not admin_user:
+            admin_user = User(
+                username="Osama",
+                email="osama@example.com",
+                is_admin=True
+            )
+            admin_user.set_password("123456")
+            db.session.add(admin_user)
+            db.session.commit()
+            print("تم إنشاء حساب المشرف Osama")
+        
+        print("تم تهيئة قاعدة البيانات بنجاح!")
+    except Exception as e:
+        print(f"حدث خطأ أثناء تهيئة قاعدة البيانات: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
 
 print("Loading models...")
 try:
@@ -283,8 +301,8 @@ def analyze_url_details(url):
             'noon.com', 'jumia.com', 'souq.com',
             
             # شركات التكنولوجيا الكبرى
-            'microsoft.com', 'apple.com', 'ibm.com', 'oracle.com', 'intel.com',
-            'amd.com', 'nvidia.com', 'cisco.com', 'dell.com', 'hp.com',
+             'apple.com', 'ibm.com', 'oracle.com', 'intel.com',
+            'amd.com', 'nvidia.com', 'cisco.com', 'dell.com', 
             
             # منصات التعليم
             'udemy.com', 'coursera.org', 'edx.org', 'duolingo.com', 'khan-academy.org',
@@ -293,18 +311,17 @@ def analyze_url_details(url):
             'gmail.com', 'outlook.com', 'hotmail.com', 'protonmail.com', 'yahoo.com',
             
             # منصات استضافة وتطوير
-            'github.com', 'gitlab.com', 'bitbucket.org', 'stackoverflow.com', 'aws.amazon.com',
+            'github.com', 'gitlab.com', 'bitbucket.org', 'stackoverflow.com', 
             'azure.microsoft.com', 'cloud.google.com', 'heroku.com', 'digitalocean.com',
             
             # خدمات الترفيه
-            'netflix.com', 'spotify.com', 'disney.com', 'hulu.com', 'twitch.tv',
+             'spotify.com', 'disney.com', 'hulu.com', 'twitch.tv',
             'steam.com', 'ea.com', 'playstation.com', 'xbox.com',
             
-            # خدمات الأخبار والمعلومات
-            'bbc.com', 'cnn.com', 'reuters.com', 'wikipedia.org', 'medium.com',
+    
             
             # خدمات الاتصال والمؤتمرات
-            'zoom.us', 'teams.microsoft.com', 'meet.google.com', 'skype.com', 'discord.com',
+            'zoom.us',  'meet.google.com', 'skype.com', 'discord.com',
             
             # خدمات التخزين السحابي
             'dropbox.com', 'drive.google.com', 'onedrive.live.com', 'icloud.com', 'box.com',
@@ -314,19 +331,14 @@ def analyze_url_details(url):
             
             # مواقع حكومية وتعليمية
             'edu', 'gov', 'mil', 'int',
-            
-            # خدمات الأمن والحماية
-            'norton.com', 'mcafee.com', 'kaspersky.com', 'avg.com', 'avast.com',
-            
-            # منصات الأعمال والتوظيف
-            'indeed.com', 'glassdoor.com', 'monster.com', 'upwork.com', 'freelancer.com'
+         
         }
 
         # فحص النطاقات الموثوقة
         domain_parts = domain.split('.')
         base_domain = '.'.join(domain_parts[-2:]) if len(domain_parts) > 1 else domain
         
-        # التحقق من النطاق الرئيسي والنطاقات الفرعية للمواقع الموثوقة
+         # التحقق من النطاق الرئيسي والنطاقات الفرعية للمواقع الموثوقة
         if any(base_domain.endswith(trusted) for trusted in trusted_domains):
             return [], 0.0  # إرجاع قائمة فارغة ودرجة خطورة 0 للنطاقات الموثوقة
 
@@ -363,12 +375,7 @@ def analyze_url_details(url):
         if suspicious_word_found:
             score += 20.5
 
-        # فحص الهوموغراف
-        total_checks += 1
-        homograph = check_homograph_tld(url)
-        if homograph:
-            details.append(homograph)
-            score += 30.5
+        
 
         # فحص تشفير/إخفاء الرابط
         total_checks += 1
@@ -417,6 +424,12 @@ def scan_url(url):
     start_time = time.time()
     details, risk_score = analyze_url_details(url)
     
+    # إضافة فحص الهوموغراف إلى التحليل اليدوي
+    homograph_alert = check_homograph_tld(url)
+    if homograph_alert:
+        details.append(homograph_alert)
+        risk_score = min(risk_score + 40, 100)  # زيادة درجة الخطورة مع ضمان ألا تتجاوز 100%
+    
     # إنشاء إشعار للمستخدم عند اكتشاف تهديد فقط إذا كانت النتيجة مشبوهة
     if 'user_id' in session and risk_score > 50:
         username = User.query.get(session['user_id']).username
@@ -460,6 +473,7 @@ def scan_url(url):
         except Exception as e:
             logger.error(f"Error in ML prediction: {str(e)}")
 
+    # إذا كان هناك مشاكل في التحليل اليدوي أو فشل التحقق الآلي
     result = {
         'url': url,
         'status': 'malicious',
@@ -488,177 +502,187 @@ def check_models_loaded():
     if msg_model is None or vectorizer is None:
         raise RuntimeError("نماذج فحص البريد الإلكتروني غير محملة")
 
+# Helper to extract non-ASCII characters in a URL
+def get_non_standard_chars(url):
+    return sorted(set(ch for ch in url if ord(ch) > 127))
+
+
 def scan_email(content):
-    """Scan email content with database storage"""
+    """Scan email content with database storage, including homograph URL detection"""
     try:
-        # التحقق من تحميل النماذج
+        # قائمة الروابط الهوموقرافية مضمّنة مباشرة داخل الدالة
+        HOMO_URLS = [
+            "https://www.аррӏе.com","https://www.gооglе.com","https://www.fасеbооk.com","https://www.yоutube.com","https://www.micrоsоft.com", "https://www.twittеr.com",
+            "https://www.linkedіn.com", "https://www.ebаy.com","https://www.wikipеdia.org", "https://www.reddіt.com", "https://www.instagrаm.com", "https://www.paypаl.com",
+            "https://www.adоbe.com", "https://www.whatsаpp.com", "https://www.telegram.mе","https://www.slack.cоm", "https://www.twitch.tѵ", "https://www.spotіfy.com",
+            "https://www.yahоо.com","https://www.hоtmail.com","https://www.bing.cоm", "https://www.airbnb.cоm", "https://www.uber.cоm", "https://www.teslа.com",
+            "https://www.samsung.cоm", "https://www.sony.cоm", "https://www.apple.сom", "https://www.googlе.com", "https://www.facebоok.com", "https://www.alibаba.com",
+            "https://www.skype.cоm","https://www.githuЬ.com", "https://www.stackоverflow.com", "https://www.medium.cоm","https://www.quоra.com",
+            "https://www.gооgle.com","https://www.аdоbе.com","https://www.mісrоsоft.com","https://www.рayраl.com","https://www.tesӏa.com","https://www.ebау.com",
+            "https://www.сisсo.com", "https://www.νisa.com", "https://www.gοοgle.com", "https://www.wikipediа.org", "https://www.lіnkedin.com", "https://www.twіtter.com",
+            "https://www.ԁell.com""https://www.cnпn.com","https://www.bвc.com","https://www.pіnterest.com",
+            "https://www.dropbох.com","https://www.payраl.com","https://www.shoрify.com","https://www.mailchіmp.com","https://www.spotіfy.com","https://www.reutеrs.com",
+            "https://www.lіve.com","https://www.blooмberg.com","https://www.forЬes.com","https://www.huffіngtonpost.com","https://www.tеd.com","https://www.medіum.com",
+            "https://www.aіrchina.com", "https://www.drорbox.com", "https://www.wordprеss.com", "https://www.adіdas.com", "https://www.wеllsfargo.com", 
+            "https://www.chаse.com", "https://www.aтt.com", "https://www.verіzon.com",   "https://www.tіktok.com", 
+            "https://www.transfеrwise.com","https://www.bаnkofamerica.com","https://www.snарchat.com", "https://www.aіrtel.com", 
+            "https://www.esрn.com", "https://www.weаther.com", "https://www.craigslіst.org", "https://www.indеed.com", "https://www.glassdoоr.com",
+            "https://www.zіllow.com", 
+        ]
+
         check_models_loaded()
-        
         start_time = time.time()
         reasons = []
-        safety_score = 100  # نبدأ من 100 ونخصم حسب المخاطر
-        url_safety_score = 100
-        
+        safety_score = 100.0
+        url_safety_score = 100.0
+        homograph_found = False
+
+        # 0. فحص كلمة "spam" المباشرة
+        if 'spam' in content.lower():
+            safety_score -= 10
+            reasons.append("كلمة 'spam' مكتشفة: -10% من درجة الأمان")
+
         # 1. فحص الكلمات المشبوهة
         kws = check_spam_keywords(content)
         if kws:
-            # تخفيض 5 نقاط لكل كلمة مشبوهة بحد أقصى 30 نقطة
-            keyword_penalty = min(len(kws) * 5, 30)
-            safety_score -= keyword_penalty
-            reasons.append(f"تم اكتشاف كلمات مشبوهة: {', '.join(kws)}")
-            if len(kws) > 3:
-                reasons.append("تنبيه: وجود عدة كلمات مشبوهة")
+            penalty = min(len(kws) * 10, 30)
+            safety_score -= penalty
+            reasons.append(f"تم اكتشاف كلمات مشبوهة: {', '.join(kws)} (-{penalty}% من درجة الأمان)")
 
         # 2. تصنيف النص
         clean = remove_urls(content)
         vec = vectorizer.transform([clean])
         txt_pred = msg_model.predict(vec)[0]
         txt_proba = msg_model.predict_proba(vec)[0]
-        
-        if txt_pred == 0:  # Ham
-            text_confidence = txt_proba[0] * 100
-            reasons.append(f"تصنيف النص: آمن (نسبة الثقة: {txt_proba[0]:.0%})")
-        else:  # Spam
-            text_confidence = (1 - txt_proba[1]) * 100
-            # تخفيض بنسبة مناسبة حسب درجة الثقة
-            safety_score = safety_score * (text_confidence / 100)
-            reasons.append(f"تصنيف النص: يحتوي على بعض المؤشرات المشبوهة (نسبة الثقة: {txt_proba[1]:.0%})")
+        # استخدام درجة الأمان بدلاً من نص التصنيف
+        proba_safe = txt_proba[0] * 100
+        if txt_pred == 0:
+            reasons.append(f"نموذج التصنيف: آمن (ثقة {proba_safe:.0f}%) بدون خصم)")
+        else:
+            proba_spam = txt_proba[1] * 100
+            deduction = min(proba_spam * 0.5, 30)
+            safety_score -= deduction
+            reasons.append(f"نموذج التصنيف: مشبوه (ثقة {proba_spam:.0f}%) (-{deduction:.0f}% من درجة الأمان)")
 
         # 3. تحليل LIME
-        explanations = explain_email(clean)
+        explanations = explain_email(clean)  # يفترض استخدام مكتبة LIME هنا
         if explanations:
-            reasons.append("تحليل المحتوى:")
+            reasons.append("تفاصيل تحليل LIME وتعديل درجة الأمان:")
             for feat, weight in explanations:
-                if abs(weight) > 0.1:
-                    direction = "يقلل" if weight > 0 else "يزيد"
-                    reasons.append(f"- {feat}: {direction} من احتمالية الخطورة بنسبة {abs(weight):.0%}")
+                pct = weight * 100
+                if pct > 0:
+                    safety_score += pct
+                    reasons.append(f"+{pct:.0f}% لدرجة الأمان بسبب '{feat}'")
+                else:
+                    safety_score -= abs(pct)
+                    reasons.append(f"-{abs(pct):.0f}% لدرجة الأمان بسبب '{feat}'")
 
-        # 4. فحص الروابط
-        url_results = []
+        # 4. الكشف عن روابط هوموقرافية
+        for homo_url in HOMO_URLS:
+            if homo_url in content:
+                homograph_found = True
+                non_std = get_non_standard_chars(homo_url)
+                reasons.append(
+                    f"رابط هوموقرافي مكتشف: {homo_url} → أحرف غير قياسية: {', '.join(non_std)}"
+                )
+
+        # 5. فحص الروابط العادية وتحليلها
         urls = extract_urls(content)
+        url_results = []
         if urls:
-            malicious_count = 0
-            url_scores = []
-            
+            bad = 0
+            probs = []
             for u in urls:
                 res = scan_url(u)
+                homo = check_homograph_tld(u)
+                res['homograph'] = homo
                 url_results.append(res)
-                if res['status'] == 'malicious':
-                    malicious_count += 1
-                    reasons.append(f"رابط مشبوه: {u} ({res['reason']})")
-                url_scores.append(res.get('probability', 50))
-            
-            if url_scores:
-                url_safety_score = sum(url_scores) / len(url_scores)
-                
-                # تخفيض النتيجة النهائية بناءً على نسبة الروابط المشبوهة
-                if malicious_count > 0:
-                    malicious_ratio = malicious_count / len(urls)
-                    url_penalty = malicious_ratio * 30  # تخفيض حتى 30 نقطة حسب نسبة الروابط المشبوهة
-                    safety_score = max(safety_score - url_penalty, 40)  # لا تقل عن 40
-                    reasons.append(f"تم تخفيض نسبة الأمان بسبب وجود {malicious_count} روابط مشبوهة من أصل {len(urls)}")
 
-        # حساب النتيجة النهائية
-        # وزن النص 70% ووزن الروابط 30%
-        final_score = (safety_score * 0.7) + (url_safety_score * 0.3)
-        final_score = max(min(final_score, 100), 0)  # تأكد من أن النتيجة بين 0 و 100
-        
-        # تحديد الحالة النهائية
+                if homo:
+                    homograph_found = True
+                    non_std = get_non_standard_chars(u)
+                    reasons.append(
+                        f"تحذير هوموقراف من خلال TLD: {u} → أحرف غير قياسية: {', '.join(non_std)}"
+                    )
+
+                if res['status'] == 'malicious':
+                    bad += 1
+                    reasons.append(f"رابط مشبوه: {u} ({res['reason']})")
+                probs.append(res['probability'])
+            url_safety_score = sum(probs) / len(probs)
+            if bad > 0:
+                penalty = (bad / len(urls)) * 30
+                safety_score = max(safety_score - penalty, 30)
+                reasons.append(f"خصم إضافي {penalty:.0f}% لوجود {bad}/{len(urls)} روابط مشبوهة")
+
+        # 6. تطبيق نقص الثقة عند وجود هوموقراف (50%)
+        if homograph_found:
+            reasons.append
+            safety_score *= 0.7
+            url_safety_score *= 0.3
+
+        # 7. احتساب النتيجة النهائية
+        safety_score = max(0, min(safety_score, 100))
+        final_score = max(0, min(safety_score * 0.7 + url_safety_score * 0.3, 100))
         final = 'Ham' if final_score >= 50 else 'Spam'
         scan_time = time.time() - start_time
-        
+
         result = {
             'status': final,
-            'probability': round(final_score, 2),
+            'probability': round(final_score, 2),  # هذه هي درجة الأمان الظاهرة
             'reasons': reasons,
             'url_results': url_results
         }
-        
-        # تخزين في قاعدة البيانات
+
+
+        # تخزين
         scan_result = ScanResult(
             scan_type='email',
             content_hash=hashlib.sha256(content.encode()).hexdigest(),
-            is_threat=final == 'Spam',
-            threat_level='high' if final_score < 25 else 'medium' if final_score < 50 else 'low',
+            is_threat=(final == 'Spam'),
+            threat_level=('high' if final_score < 25 else 'medium' if final_score < 60 else 'low'),
             scan_details=result,
             scan_time=scan_time
         )
         db.session.add(scan_result)
         db.session.commit()
-        
+
+        # إشعارات
         if 'user_id' in session and final == 'Spam':
             create_notification(
                 user_id=session['user_id'],
-                title='تحذير: تم اكتشاف بريد مشبوه',
-                message='تم اكتشاف محتوى مشبوه في البريد الإلكتروني',
+                title='تحذير: بريد مشبوه',
+                message=f'تم اكتشاف بريد مشبوه (ثقة {final_score:.0f}%)',
                 type='threat'
             )
-        
-        return result
-        
-    except Exception as e:
-        logger.error(f"Error scanning email: {str(e)}")
-        return {
-            'status': 'error',
-            'probability': 0,
-            'reasons': [f"حدث خطأ أثناء الفحص: {str(e)}"],
-            'url_results': []
-        }
+            username = User.query.get(session['user_id']).username
+            create_admin_notification(
+                title='فحص بريد إلكتروني',
+                message=f'المستخدم {username} فحص بريداً → {final} ({final_score:.0f}%)',
+                type='scan'
+            )
 
-def scan_pe(filepath):
-    """Perform PE or text scan on uploaded file or extracted archive contents"""
-    results = []
-    fname = os.path.basename(filepath)
-    ext = os.path.splitext(fname)[1].lower()
-    
-    if ext in ['.zip', '.rar']:
-        with tempfile.TemporaryDirectory() as tmp:
-            if extract_archive(filepath, tmp):
-                for root, _, files in os.walk(tmp):
-                    for fn in files:
-                        results += scan_pe(os.path.join(root, fn))
-    elif ext == '.txt':
-        text_res = scan_text_file(filepath)
-        is_suspicious = bool(text_res)
-        
-        danger_score = 0
-        if 'suspicious_urls' in text_res:
-            url_count = text_res['suspicious_urls']['count']
-            danger_score = min(100, danger_score + (url_count * 20))
-        
-        danger_score = min(100, danger_score + (len(text_res) * 15))
-        safety_score = 100 - danger_score
-        label = 'مشبوه' if is_suspicious else 'آمن'
-        
-        results.append({
-            'filename': fname,
-            'type': 'Text',
-            'label': label,
-            'confidence': safety_score,
-            'details': text_res
-        })
-    else:
-        try:
-            df = extract_pe_features(filepath)
-            pred = pe_model.predict(df)[0]
-            proba = pe_model.predict_proba(df)[0]
-            label = 'آمن' if pred == 1 else 'ضار'
-            results.append({
-                'filename': fname,
-                'type': 'PE',
-                'label': label,
-                'confidence': round(max(proba)*100,2),
-                'details': {}
-            })
-        except Exception as e:
-            results.append({
-                'filename': fname,
-                'type': 'Unknown',
-                'label': 'غير معروف',
-                'confidence': 50,
-                'details': {'error': 'لا يمكن فحص هذا النوع من الملفات'}
-            })
-    return results 
+        return result
+    except Exception as e:
+        logger.error(f"Error scanning email: {e}")
+        return {'status':'error','probability':0,'reasons':[f'خطأ: {e}'],'url_results':[]}
+
+def check_homograph_tld(url):
+    """الكشف عن الهوموغراف باستخدام Punycode أو أحرف يونيكود مشابهة"""
+    domain = urlparse(url).netloc
+    try:
+        decoded_domain = idna.decode(domain)
+    except idna.IDNAError:
+        decoded_domain = domain
+    if 'xn--' in domain or 'xn--' in decoded_domain:
+        return 'تم اكتشاف هوموقراف Punycode'
+    if any(ord(c) > 0x7F for c in decoded_domain):
+        return 'تم اكتشاف أحرف غير ASCII (هوموغراف محتمل)'
+    tld = decoded_domain.split('.')[-1]
+    if len(tld) > 3:
+        return f'رابط هوموقرافي.{tld}'
+    return None
+
 
 def load_spam_keywords(file_path='spam_keywords.txt'):
     """تحميل الكلمات المشبوهة من الملف"""
@@ -699,7 +723,7 @@ def check_homograph_tld(url):
     # التحقق من طول النطاق العلوي (TLD)
     tld = decoded_domain.split('.')[-1]
     if len(tld) > 3:
-        return f'نطاق علوي غير معتاد .{tld}'
+        return f'رابط هوموقرافي.{tld}'
     
     return None
 
@@ -741,84 +765,6 @@ def explain_email(text):
     exp = explainer.explain_instance(text, pred_prob, num_features=5)
     return exp.as_list()
 
-def extract_archive(filepath, extract_dir):
-    """Extract ZIP or RAR archives for recursive scanning"""
-    if zipfile.is_zipfile(filepath):
-        with zipfile.ZipFile(filepath, 'r') as z:
-            z.extractall(extract_dir)
-        return True
-    if rarfile.is_rarfile(filepath):
-        with rarfile.RarFile(filepath, 'r') as r:
-            r.extractall(extract_dir)
-        return True
-    return False
-
-def scan_text_file(filepath):
-    """Scan plain text files within archives for malicious patterns"""
-    results = OrderedDict()
-    with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-        data = f.read()
-        
-        # فحص الأنماط المشبوهة الحالية
-        for pid, (pat, desc) in MALICIOUS_PATTERNS.items():
-            matches = re.findall(pat, data, flags=re.IGNORECASE)
-            if matches:
-                results[pid] = {'description': desc, 'count': len(matches), 'examples': list(set(matches))[:3]}
-        
-        # فحص الروابط المشبوهة
-        urls = extract_urls(data)
-        suspicious_urls = []
-        if urls:
-            for url in urls:
-                url_result = scan_url(url)
-                if url_result['status'] == 'malicious':
-                    suspicious_urls.append({
-                        'url': url,
-                        'reason': url_result['reason'],
-                        'probability': url_result['probability']
-                    })
-            
-            if suspicious_urls:
-                results['suspicious_urls'] = {
-                    'description': 'روابط مشبوهة في الملف',
-                    'count': len(suspicious_urls),
-                    'examples': suspicious_urls
-                }
-    
-    return results
-
-def extract_pe_features(filepath):
-    """Extract numeric and directory features from a PE file"""
-    pe = pefile.PE(filepath)
-    # Count suspicious patterns in raw data
-    data = open(filepath, 'rb').read().decode('latin-1', errors='ignore')
-    bitcoin_count = len(re.findall(MALICIOUS_PATTERNS['bitcoin_address'][0], data))
-    # Collect selected PE header fields
-    features = {
-        'Machine': pe.FILE_HEADER.Machine,
-        'DebugSize': pe.OPTIONAL_HEADER.DATA_DIRECTORY[6].Size,
-        'DebugRVA': pe.OPTIONAL_HEADER.DATA_DIRECTORY[6].VirtualAddress,
-        'MajorImageVersion': pe.OPTIONAL_HEADER.MajorImageVersion,
-        'MajorOSVersion': pe.OPTIONAL_HEADER.MajorOperatingSystemVersion,
-        'ExportRVA': pe.OPTIONAL_HEADER.DATA_DIRECTORY[0].VirtualAddress,
-        'ExportSize': pe.OPTIONAL_HEADER.DATA_DIRECTORY[0].Size,
-        'IatVRA': pe.OPTIONAL_HEADER.DATA_DIRECTORY[12].VirtualAddress,
-        'MajorLinkerVersion': pe.OPTIONAL_HEADER.MajorLinkerVersion,
-        'MinorLinkerVersion': pe.OPTIONAL_HEADER.MinorLinkerVersion,
-        'NumberOfSections': pe.FILE_HEADER.NumberOfSections,
-        'SizeOfStackReserve': pe.OPTIONAL_HEADER.SizeOfStackReserve,
-        'DllCharacteristics': pe.OPTIONAL_HEADER.DllCharacteristics,
-        'ResourceSize': pe.OPTIONAL_HEADER.DATA_DIRECTORY[2].Size,
-        'BitcoinAddresses': bitcoin_count
-    }
-    pe.close()
-    # Align DataFrame to model features
-    df = pd.DataFrame([features])
-    for col in pe_model.feature_names_in_:
-        if col not in df.columns:
-            df[col] = 0
-    df = df[pe_model.feature_names_in_]
-    return df
 
 # Login required decorator
 def login_required(f):
@@ -936,106 +882,220 @@ def email_check():
     
     return render_template('email.html', email_res=email_res)
 
+
+def extract_archive(filepath, extract_dir=None):
+    if extract_dir is None:
+        extract_dir = os.path.join("extracted", os.path.splitext(os.path.basename(filepath))[0])
+    os.makedirs(extract_dir, exist_ok=True)
+
+    try:
+        if zipfile.is_zipfile(filepath):
+            with zipfile.ZipFile(filepath, 'r') as z:
+                z.extractall(extract_dir)
+            return True
+        elif rarfile.is_rarfile(filepath):
+            with rarfile.RarFile(filepath, 'r') as r:
+                r.extractall(extract_dir)
+            return True
+        return False
+    except Exception:
+        return False
+# دالة مساعدة لحساب الهاش
+def calculate_hash(filepath):
+    sha256 = hashlib.sha256()
+    with open(filepath, 'rb') as f:
+        while chunk := f.read(4096):
+            sha256.update(chunk)
+    return sha256.hexdigest()
+
+# دالة فحص الملفات النصية المحدثة
+def scan_text_file(filepath):
+    results = OrderedDict()
+    danger_score = 0
+    with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+        data = f.read()
+        
+        for pid, (pat, desc) in MALICIOUS_PATTERNS.items():
+            matches = re.findall(pat, data, flags=re.IGNORECASE)
+            if matches:
+                results[pid] = {
+                    'description': desc,
+                    'count': len(matches),
+                    'examples': list(set(matches))[:3]
+                }
+                danger_score += len(matches) * 10
+                
+    danger_score = min(danger_score, 100)
+    return results, danger_score
+
+
+def extract_pe_features(filepath):
+    """Extract numeric and directory features from a PE file"""
+    pe = pefile.PE(filepath)
+    # Count suspicious patterns in raw data
+    data = open(filepath, 'rb').read().decode('latin-1', errors='ignore')
+    bitcoin_count = len(re.findall(MALICIOUS_PATTERNS['bitcoin_address'][0], data))
+    # Collect selected PE header fields
+    features = {
+        'Machine': pe.FILE_HEADER.Machine,
+        'DebugSize': pe.OPTIONAL_HEADER.DATA_DIRECTORY[6].Size,
+        'DebugRVA': pe.OPTIONAL_HEADER.DATA_DIRECTORY[6].VirtualAddress,
+        'MajorImageVersion': pe.OPTIONAL_HEADER.MajorImageVersion,
+        'MajorOSVersion': pe.OPTIONAL_HEADER.MajorOperatingSystemVersion,
+        'ExportRVA': pe.OPTIONAL_HEADER.DATA_DIRECTORY[0].VirtualAddress,
+        'ExportSize': pe.OPTIONAL_HEADER.DATA_DIRECTORY[0].Size,
+        'IatVRA': pe.OPTIONAL_HEADER.DATA_DIRECTORY[12].VirtualAddress,
+        'MajorLinkerVersion': pe.OPTIONAL_HEADER.MajorLinkerVersion,
+        'MinorLinkerVersion': pe.OPTIONAL_HEADER.MinorLinkerVersion,
+        'NumberOfSections': pe.FILE_HEADER.NumberOfSections,
+        'SizeOfStackReserve': pe.OPTIONAL_HEADER.SizeOfStackReserve,
+        'DllCharacteristics': pe.OPTIONAL_HEADER.DllCharacteristics,
+        'ResourceSize': pe.OPTIONAL_HEADER.DATA_DIRECTORY[2].Size,
+        'BitcoinAddresses': bitcoin_count
+    }
+    pe.close()
+    # Align DataFrame to model features
+    df = pd.DataFrame([features])
+    for col in pe_model.feature_names_in_:
+        if col not in df.columns:
+            df[col] = 0
+    df = df[pe_model.feature_names_in_]
+    return df
+
+
+
+# دالة فحص الملفات المستخرجة المحدثة
+def scan_extracted_files(extract_dir):
+    results = []
+    for root, _, files in os.walk(extract_dir):
+        for file in files:
+            path = os.path.join(root, file)
+            ext = os.path.splitext(file)[1].lower()
+            file_hash = calculate_hash(path)
+            
+            result = {
+                'filename': file,
+                'file_type': 'Unknown',
+                'hash_sha256': file_hash,
+                'label': 'آمن',
+                'probability': 0,
+                'details': {},
+                'nested_results': []
+            }
+
+            if ext in ('.exe', '.dll'):
+                features = extract_pe_features(path)
+                if features is not None:
+                    pred = pe_model.predict(features)[0]
+                    proba = pe_model.predict_proba(features)[0]
+                    result.update({
+                        'file_type': 'PE File',
+                        'label': 'آمن' if pred == 1 else 'ضار',
+                        'probability': round(max(proba) * 100, 2),
+                        'details': features.to_dict()
+                    })
+                    
+            elif ext == '.txt':
+                text_results, danger_score = scan_text_file(path)
+                result.update({
+                    'file_type': 'Text File',
+                    'label': 'مشبوه' if danger_score > 50 else 'آمن',
+                    'probability': danger_score,
+                    'details': text_results
+                })
+                
+            elif ext in ('.zip', '.rar'):
+                with tempfile.TemporaryDirectory() as tmp_dir:
+                    if extract_archive(path, tmp_dir):
+                        nested_results = scan_extracted_files(tmp_dir)
+                        max_prob = max([r['probability'] for r in nested_results], default=0)
+                        result.update({
+                            'file_type': 'Archive',
+                            'label': 'مشبوه' if max_prob > 50 else 'آمن',
+                            'probability': max_prob,
+                            'nested_results': nested_results
+                        })
+            
+            results.append(result)
+    return results
+# تعديل نقطة النهاية الرئيسية
 @app.route('/file_check', methods=['GET', 'POST'])
 def file_check():
     if request.method == 'POST':
         if 'pe_file' not in request.files:
-            return render_template('file.html', error="لم يتم اختيار ملف")
-        
+            return jsonify({'error': 'لم يتم اختيار ملف'}), 400
+            
         file = request.files['pe_file']
         if file.filename == '':
-            return render_template('file.html', error="لم يتم اختيار ملف")
+            return jsonify({'error': 'اسم ملف غير صالح'}), 400
+
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        
+        try:
+            file_hash = calculate_hash(filepath)
+            ext = os.path.splitext(filename)[1].lower()
             
-        if file:
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            
-            try:
-                file.save(filepath)
-                ext = os.path.splitext(filename)[1].lower()
-                
-                if ext == '.pdf':
-                    results = scan_pdf_file(filepath)
-                    file_res = {
-                        'filename': filename,
-                        'type': 'PDF',
-                        'label': 'مشبوه' if results['danger_score'] > 50 else 'آمن',
-                        'probability': max(0, min(100, 100 - results['danger_score'])),
-                        'details': results['details'],
-                        'patterns': results['patterns_found'],
-                        'suspicious_urls': results.get('suspicious_urls', [])
-                    }
-                
-                elif ext == '.txt':
-                    with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-                        content = f.read()
-                    results = scan_text_content(content)
-                    file_res = {
-                        'filename': filename,
-                        'type': 'Text',
-                        'label': 'مشبوه' if results['danger_score'] > 50 else 'آمن',
-                        'probability': max(0, min(100, 100 - results['danger_score'])),
-                        'details': results['details'],
-                        'patterns': results['patterns_found']
-                    }
-                
-                else:
-                    try:
-                        df = extract_pe_features(filepath)
-                        pred = pe_model.predict(df)[0]
-                        proba = pe_model.predict_proba(df)[0]
+            result = {
+                'filename': filename,
+                'file_type': 'Unknown',
+                'hash_sha256': file_hash,
+                'label': 'آمن',
+                'probability': 0,
+                'details': {},
+                'nested_results': []
+            }
+
+            if ext in ('.zip', '.rar'):
+                with tempfile.TemporaryDirectory() as tmp_dir:
+                    if extract_archive(filepath, tmp_dir):
+                        nested_results = scan_extracted_files(tmp_dir)
+                        max_prob = max([r['probability'] for r in nested_results], default=0)
+                        result.update({
+                            'file_type': 'Archive',
+                            'label': 'مشبوه' if max_prob > 50 else 'آمن',
+                            'probability': max_prob,
+                            'nested_results': nested_results
+                        })
                         
-                        file_res = {
-                            'filename': filename,
-                            'type': 'PE',
-                            'label': 'آمن' if pred == 1 else 'ضار',
-                            'probability': round(max(proba) * 100, 2),
-                            'details': ['تم تحليل الملف كملف تنفيذي'],
-                            'patterns': {}
-                        }
-                    except:
-                        file_res = {
-                            'filename': filename,
-                            'type': 'غير معروف',
-                            'label': 'غير مدعوم',
-                            'probability': 0,
-                            'details': ['نوع الملف غير مدعوم للفحص'],
-                            'patterns': {}
-                        }
+            elif ext == '.txt':
+                text_results, danger_score = scan_text_file(filepath)
+                result.update({
+                    'file_type': 'Text File',
+                    'label': 'مشبوه' if danger_score > 50 else 'آمن',
+                    'probability': danger_score,
+                    'details': text_results
+                })
                 
-                # إنشاء إشعار للمستخدم إذا كان مسجل دخول
-                if 'user_id' in session:
-                    create_notification(
-                        user_id=session['user_id'],
-                        title=f'نتيجة فحص الملف: {file_res["label"]}',
-                        message=f'تم فحص الملف: {filename}\nالنوع: {file_res["type"]}\nالنتيجة: {file_res["label"]}\nدرجة الثقة: {file_res["probability"]}%',
-                        type='scan'
-                    )
-                    
-                    # إنشاء إشعار للمشرفين
-                    username = User.query.get(session['user_id']).username
-                    create_admin_notification(
-                        title=f"عملية فحص ملف جديدة",
-                        message=f"قام المستخدم {username} بفحص الملف: {filename}\nالنوع: {file_res['type']}\nالنتيجة: {file_res['label']}\nدرجة الثقة: {file_res['probability']}%",
-                        type="scan"
-                    )
-                
-                try:
-                    os.remove(filepath)
-                except:
-                    pass
-                
-                return render_template('file.html', file_res=file_res)
-                
-            except Exception as e:
-                try:
-                    os.remove(filepath)
-                except:
-                    pass
-                flash(f'حدث خطأ أثناء فحص الملف: {str(e)}', 'error')
-                return render_template('file.html')
-    
+            else:
+                features = extract_pe_features(filepath)
+                if features is not None:
+                    pred = pe_model.predict(features)[0]
+                    proba = pe_model.predict_proba(features)[0]
+                    result.update({
+                        'file_type': 'PE File',
+                        'label': 'آمن' if pred == 1 else 'ضار',
+                        'probability': round(max(proba) * 100, 2),
+                        'details': features.to_dict()
+                    })
+
+            os.remove(filepath)
+            return jsonify({
+                'success': True,
+                'result': result,
+                'recommendations': [
+                    'حذف الملفات المصابة',
+                    'تحديث برامج الحماية'
+                ]
+            })
+            
+        except Exception as e:
+            os.remove(filepath)
+            return jsonify({'error': f'حدث خطأ: {str(e)}'}), 500
+
     return render_template('file.html')
+
 
 def scan_text_content(content):
     """تحليل محتوى النص وإرجاع النتائج"""
@@ -1104,11 +1164,11 @@ def scan_pdf_file(filepath):
     }
     
     try:
-        # فتح ملف PDF وقراءة أول 5 صفحات فقط
+        # فتح ملف PDF وقراءة أول 15 صفحات فقط
         reader = PdfReader(filepath)
         content = ""
         
-        pages_to_scan = min(5, len(reader.pages))
+        pages_to_scan = min(15, len(reader.pages))
         for i in range(pages_to_scan):
             try:
                 page_text = reader.pages[i].extract_text()
@@ -1353,7 +1413,6 @@ def update_support_status(message_id):
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/admin/support/<int:message_id>/respond', methods=['POST'])
-@admin_required
 def respond_to_support(message_id):
     """الرد على رسالة دعم فني"""
     message = SupportMessage.query.get_or_404(message_id)
@@ -1422,6 +1481,26 @@ def articles():
     """صفحة قاعدة المعرفة والمقالات"""
     return render_template('articles.html')
 
+@app.route('/phishing_guide')
+def phishing_guide():
+    """صفحة دليل التصيد"""
+    return render_template('edu/phishing_guide.html')
+
+@app.route('/best_practices')
+def best_practices():
+    """صفحة أفضل الممارسات"""
+    return render_template('edu/best_practices.html')
+
+@app.route('/security_awareness')
+def security_awareness():
+    """صفحة التوعية الأمنية"""
+    return render_template('edu/security_awareness.html')
+
+@app.route('/edu/educational_videos')
+def educational_videos():
+    """صفحة الفيديوهات التعليمية"""
+    return render_template('edu/educational_videos.html')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """صفحة تسجيل الدخول"""
@@ -1468,10 +1547,17 @@ def register():
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
 
+        # التحقق من وجود جميع الحقول المطلوبة
+        if not all([username, email, password, confirm_password]):
+            flash('جميع الحقول مطلوبة', 'error')
+            return render_template('register.html')
+
+        # التحقق من تطابق كلمات المرور
         if password != confirm_password:
             flash('كلمات المرور غير متطابقة', 'error')
             return render_template('register.html')
 
+        # التحقق من عدم وجود المستخدم مسبقاً
         if User.query.filter_by(username=username).first():
             flash('اسم المستخدم مستخدم بالفعل', 'error')
             return render_template('register.html')
@@ -1480,13 +1566,33 @@ def register():
             flash('البريد الإلكتروني مستخدم بالفعل', 'error')
             return render_template('register.html')
 
-        user = User(username=username, email=email)
-        user.set_password(password)
-        db.session.add(user)
-        db.session.commit()
+        try:
+            # إنشاء مستخدم جديد
+            user = User(
+                username=username,
+                email=email,
+                is_admin=False
+            )
+            user.set_password(password)
+            
+            # حفظ المستخدم في قاعدة البيانات
+            db.session.add(user)
+            db.session.commit()
 
-        flash('تم إنشاء حسابك بنجاح! يمكنك الآن تسجيل الدخول', 'success')
-        return redirect(url_for('login'))
+            # إنشاء إشعار للمشرفين
+            create_admin_notification(
+                title="تسجيل مستخدم جديد",
+                message=f"قام {username} بإنشاء حساب جديد",
+                type="user_registration"
+            )
+
+            flash('تم إنشاء حسابك بنجاح! يمكنك الآن تسجيل الدخول', 'success')
+            return redirect(url_for('login'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'حدث خطأ أثناء إنشاء الحساب: {str(e)}', 'error')
+            return render_template('register.html')
 
     return render_template('register.html')
 
@@ -1871,15 +1977,17 @@ def get_support_count():
 @app.context_processor
 def inject_support_data():
     """حقن بيانات الدعم الفني في قوالب المشرف"""
-    if 'user_id' in session and User.query.get(session['user_id']).is_admin:
-        latest_messages = SupportMessage.query.order_by(
-            SupportMessage.created_at.desc()
-        ).limit(5).all()
-        pending_count = SupportMessage.query.filter_by(status='pending').count()
-        return {
-            'latest_support_messages': latest_messages,
-            'support_messages_count': pending_count
-        }
+    if 'user_id' in session:
+        user = db.session.get(User, session['user_id'])
+        if user and user.is_admin:
+            latest_messages = SupportMessage.query.order_by(
+                SupportMessage.created_at.desc()
+            ).limit(5).all()
+            pending_count = SupportMessage.query.filter_by(status='pending').count()
+            return {
+                'latest_support_messages': latest_messages,
+                'support_messages_count': pending_count
+            }
     return {}
 
 @app.route('/support/chat/<int:message_id>/messages')
@@ -1984,10 +2092,15 @@ def mark_chat_messages_read(message_id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+@app.route('/password_strength')
+def password_strength():
+    """صفحة فحص قوة كلمة المرور"""
+    return render_template('password_strength.html')
+
 if __name__ == '__main__':
     logger.info("Starting Flask application...")
     try:
-        app.run(debug=True, host='0.0.0.0', port=5000)
+        app.run(debug=True, use_reloader=True)
     except Exception as e:
         logger.error(f"Error starting Flask app: {str(e)}")
         logger.error(traceback.format_exc())

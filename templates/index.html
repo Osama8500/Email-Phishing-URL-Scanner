@@ -5,14 +5,15 @@
 {% block content %}
 <div class="hero-section">
     <div class="hero-content">
-        <h1>حماية متقدمة من التصيد الاحتيالي</h1>
+        <h1>حماية  متقدمة من التصيد الاحتيالي</h1>
         <p class="subtitle">نظام ذكي يساعدك في كشف وحماية نفسك من هجمات التصيد الاحتيالي</p>
         <div class="hero-buttons">
-            <a href="/url_check" class="btn btn-primary">
+            <!-- ربط الزر بمعرّف القسم -->
+            <a href="#services" class="btn btn-primary">
                 <i class="fas fa-shield-alt"></i>
                 ابدأ الفحص الآن
             </a>
-            <a href="/edu/phishing" class="btn btn-secondary">
+            <a href="/edu/educational_videos" class="btn btn-secondary">
                 <i class="fas fa-book"></i>
                 تعلم المزيد
             </a>
@@ -23,7 +24,7 @@
     </div>
 </div>
 
-<section class="services-section">
+<section id="services" class="services-section">
     <h2 class="section-title">خدماتنا</h2>
     <div class="services-container">
         <!-- خدمة فحص الروابط -->
@@ -92,4 +93,27 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // سلايد سلس عند الضغط على زر "ابدأ الفحص الآن" مع رفع المسافة 100px
+  document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.querySelector('.hero-buttons a[href="#services"]');
+    if (btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.getElementById('services');
+        if (target) {
+          const offset = 100; // عدد البيكسل اللي بدك ترفعه
+          const topPos = target.getBoundingClientRect().top + window.pageYOffset;
+          window.scrollTo({
+            top: topPos - offset,
+            behavior: 'smooth'
+          });
+        }
+      });
+    }
+  });
+</script>
 {% endblock %}

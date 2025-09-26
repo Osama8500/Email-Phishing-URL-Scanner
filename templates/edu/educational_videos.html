@@ -1,0 +1,441 @@
+{% extends "base.html" %}
+
+{% block title %}الفيديوهات التعليمية - PhishGuard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edu-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        color: var(--text-color);
+        margin-bottom: 1rem;
+    }
+
+    .page-header p {
+        font-size: 1.2rem;
+        color: var(--text-color-light);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .video-filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        background: var(--container-bg);
+        color: var(--text-color);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .filter-btn i {
+        font-size: 1.1rem;
+    }
+
+    .videos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .video-card {
+        background: var(--container-bg);
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .video-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .video-thumbnail {
+        position: relative;
+        padding-top: 56.25%; /* 16:9 Aspect Ratio */
+        background: var(--bg-color);
+    }
+
+    .video-thumbnail img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .video-play-btn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .video-play-btn i {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .video-play-btn:hover {
+        background: var(--primary-color);
+    }
+
+    .video-play-btn:hover i {
+        color: white;
+    }
+
+    .video-info {
+        padding: 1.5rem;
+    }
+
+    .video-title {
+        font-size: 1.2rem;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .video-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: var(--text-color-light);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .video-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .video-description {
+        color: var(--text-color-light);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .video-tags {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .video-tag {
+        padding: 0.25rem 0.75rem;
+        background: var(--bg-color);
+        color: var(--text-color-light);
+        border-radius: 15px;
+        font-size: 0.9rem;
+    }
+
+    .load-more {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .load-more-btn {
+        padding: 1rem 2rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .load-more-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .video-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.9);
+        z-index: 1000;
+        padding: 2rem;
+    }
+
+    .video-modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        width: 100%;
+        max-width: 900px;
+        background: var(--container-bg);
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        color: var(--text-color);
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: var(--text-color);
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    .modal-body {
+        position: relative;
+        padding-top: 56.25%;
+    }
+
+    .modal-body iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edu-container">
+    <div class="page-header">
+        <h1>الفيديوهات التعليمية</h1>
+        <p>مجموعة من الفيديوهات التعليمية المختارة لمساعدتك في فهم مخاطر التصيد الاحتيالي وكيفية حماية نفسك</p>
+    </div>
+
+    <div class="video-filters">
+        <button class="filter-btn active" data-filter="all">
+            <i class="fas fa-th-large"></i>
+            جميع الفيديوهات
+        </button>
+        <button class="filter-btn" data-filter="phishing">
+            <i class="fas fa-fish"></i>
+            التصيد الاحتيالي
+        </button>
+        <button class="filter-btn" data-filter="security">
+            <i class="fas fa-shield-alt"></i>
+            الأمن السيبراني
+        </button>
+        <button class="filter-btn" data-filter="awareness">
+            <i class="fas fa-user-shield"></i>
+            التوعية الأمنية
+        </button>
+    </div>
+
+    <div class="videos-grid">
+        <!-- فيديو 1 -->
+        <div class="video-card" data-category="phishing">
+            <div class="video-thumbnail">
+                <img src="https://img.youtube.com/vi/TtcV4jpNG8M/maxresdefault.jpg" alt="صورة مصغرة للفيديو">
+                <div class="video-play-btn" data-video-id="TtcV4jpNG8M">
+                    <i class="fas fa-play"></i>
+                </div>
+            </div>
+            <div class="video-info">
+                <h3 class="video-title">كيف تحمي نفسك من التصيد الاحتيالي</h3>
+                <div class="video-meta">
+                    <span><i class="fas fa-clock"></i> 15:30</span>
+                    <span><i class="fas fa-eye"></i> دليل شامل</span>
+                </div>
+                <p class="video-description">تعلم كيفية حماية نفسك من هجمات التصيد الاحتيالي وتعرف على أحدث التقنيات المستخدمة في الحماية.</p>
+                <div class="video-tags">
+                    <span class="video-tag">التصيد الاحتيالي</span>
+                    <span class="video-tag">الأمن السيبراني</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- فيديو 2 -->
+        <div class="video-card" data-category="security">
+            <div class="video-thumbnail">
+                <img src="https://img.youtube.com/vi/oTw2rbujnRA/maxresdefault.jpg" alt="صورة مصغرة للفيديو">
+                <div class="video-play-btn" data-video-id="oTw2rbujnRA">
+                    <i class="fas fa-play"></i>
+                </div>
+            </div>
+            <div class="video-info">
+                <h3 class="video-title">أساسيات الأمن السيبراني</h3>
+                <div class="video-meta">
+                    <span><i class="fas fa-clock"></i> 12:45</span>
+                    <span><i class="fas fa-eye"></i> مقدمة تعليمية</span>
+                </div>
+                <p class="video-description">مقدمة شاملة في الأمن السيبراني وأهم المفاهيم الأساسية التي يجب معرفتها للحماية من المخاطر.</p>
+                <div class="video-tags">
+                    <span class="video-tag">الأمن السيبراني</span>
+                    <span class="video-tag">أساسيات</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- فيديو 3 -->
+        <div class="video-card" data-category="awareness">
+            <div class="video-thumbnail">
+                <img src="https://img.youtube.com/vi/GflDS0z9EUs/maxresdefault.jpg" alt="صورة مصغرة للفيديو">
+                <div class="video-play-btn" data-video-id="GflDS0z9EUs">
+                    <i class="fas fa-play"></i>
+                </div>
+            </div>
+            <div class="video-info">
+                <h3 class="video-title">التوعية الأمنية الشاملة</h3>
+                <div class="video-meta">
+                    <span><i class="fas fa-clock"></i> 18:20</span>
+                    <span><i class="fas fa-eye"></i> دورة تدريبية</span>
+                </div>
+                <p class="video-description">دورة شاملة في التوعية الأمنية تغطي جميع الجوانب المهمة لحماية نفسك وبياناتك على الإنترنت.</p>
+                <div class="video-tags">
+                    <span class="video-tag">التوعية الأمنية</span>
+                    <span class="video-tag">حماية البيانات</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="load-more">
+        <button class="load-more-btn">
+            تحميل المزيد
+            <i class="fas fa-spinner"></i>
+        </button>
+    </div>
+</div>
+
+<!-- نافذة عرض الفيديو -->
+<div class="video-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">عنوان الفيديو</h2>
+            <button class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <iframe frameborder="0" allowfullscreen></iframe>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // تفعيل الفلاتر
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const videoCards = document.querySelectorAll('.video-card');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // إزالة الكلاس active من جميع الأزرار
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            const filter = button.dataset.filter;
+            
+            videoCards.forEach(card => {
+                if (filter === 'all' || card.dataset.category === filter) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // تفعيل نافذة الفيديو
+    const modal = document.querySelector('.video-modal');
+    const modalTitle = modal.querySelector('.modal-title');
+    const modalIframe = modal.querySelector('iframe');
+    const modalClose = modal.querySelector('.modal-close');
+    
+    // فتح نافذة الفيديو
+    document.querySelectorAll('.video-play-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const videoId = btn.dataset.videoId;
+            const videoTitle = btn.closest('.video-card').querySelector('.video-title').textContent;
+            
+            modalTitle.textContent = videoTitle;
+            modalIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            modal.classList.add('active');
+        });
+    });
+    
+    // إغلاق نافذة الفيديو
+    modalClose.addEventListener('click', () => {
+        modal.classList.remove('active');
+        modalIframe.src = '';
+    });
+    
+    // إغلاق النافذة عند النقر خارجها
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+            modalIframe.src = '';
+        }
+    });
+
+    // تفعيل زر تحميل المزيد
+    document.querySelector('.load-more-btn').addEventListener('click', function() {
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحميل...';
+        // هنا يمكن إضافة منطق تحميل المزيد من الفيديوهات
+        setTimeout(() => {
+            this.innerHTML = 'تحميل المزيد <i class="fas fa-spinner"></i>';
+        }, 1500);
+    });
+});
+</script>
+{% endblock %} 

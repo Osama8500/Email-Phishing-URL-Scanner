@@ -4,95 +4,44 @@
 
 {% block extra_css %}
 <style>
-    .dropzone {
-        border: 2px dashed var(--border-color);
-        border-radius: 16px;
-        padding: 2rem;
-        text-align: center;
-        background: var(--glass-bg);
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-
-    .dropzone.dragover {
-        border-color: var(--primary-color);
-        background: rgba(74, 144, 226, 0.1);
-    }
-
-    .dropzone-icon {
-        font-size: 3rem;
-        color: var(--primary-color);
-        margin-bottom: 1rem;
-    }
-
-    .dropzone-text {
-        margin-bottom: 1rem;
-    }
-
-    .file-list {
-        margin-top: 2rem;
-    }
-
-    .file-item {
-        background: var(--glass-bg);
-        border: 1px solid var(--glass-border);
-        border-radius: 12px;
+    .dropzone { border: 2px dashed var(--border-color); border-radius: 16px; padding: 2rem; text-align: center; background: var(--glass-bg); transition: all 0.3s ease; cursor: pointer; }
+    .dropzone.dragover { border-color: var(--primary-color); background: rgba(74, 144, 226, 0.1); }
+    .dropzone-icon { font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem; }
+    .dropzone-text { margin-bottom: 1rem; }
+    .file-list { margin-top: 2rem; }
+    .file-item { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem; }
+    .file-icon { font-size: 2rem; color: var(--primary-color); }
+    .file-info { flex: 1; }
+    .file-name { font-weight: 600; margin-bottom: 0.25rem; }
+    .file-meta { font-size: 0.9rem; color: var(--light-text); }
+    .file-actions { display: flex; gap: 0.5rem; }
+    .scan-progress { margin: 2rem 0; }
+    .progress-bar { height: 8px; background: var(--glass-bg); border-radius: 4px; overflow: hidden; margin-bottom: 1rem; }
+    .progress-fill { height: 100%; background: var(--primary-color); width: 0; transition: width 0.3s ease; }
+    .progress-status { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--light-text); }
+    .risk-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+    .risk-safe { background: #28a745; color: white; }
+    .risk-suspicious { background: #ffc107; color: black; }
+    .risk-malicious { background: #dc3545; color: white; }
+    .file-details { background: var(--glass-bg); border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .nested-results { margin-left: 2rem; border-left: 2px solid var(--border-color); padding-left: 1rem; }
+    .hash-code { font-family: monospace; word-break: break-all; background: rgba(0,0,0,0.1); padding: 0.5rem; border-radius: 4px; }
+    .result-grid { display: grid; gap: 0.75rem; padding: 1rem; background: var(--glass-bg); border-radius: 8px; }
+    .grid-row { display: flex; align-items: center; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); }
+    .grid-row:last-child { border-bottom: none; }
+    .grid-label { font-weight: 600; min-width: 80px; color: var(--primary-color); }
+    .grid-value { flex: 1; word-break: break-all; }
+    .details-section { margin-top: 1rem; background: rgba(0,0,0,0.05); border-radius: 8px; padding: 1rem; }
+    .section-title { font-weight: 600; margin-bottom: 0.5rem; color: var(--primary-color); }
+    .details-content {
+        background: var(--card-bg);
+        color: var(--text-color);
         padding: 1rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .file-icon {
-        font-size: 2rem;
-        color: var(--primary-color);
-    }
-
-    .file-info {
-        flex: 1;
-    }
-
-    .file-name {
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-    }
-
-    .file-meta {
-        font-size: 0.9rem;
-        color: var(--light-text);
-    }
-
-    .file-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
-
-    .scan-progress {
-        margin: 2rem 0;
-    }
-
-    .progress-bar {
-        height: 8px;
-        background: var(--glass-bg);
         border-radius: 4px;
-        overflow: hidden;
-        margin-bottom: 1rem;
+        max-height: 300px;
+        overflow: auto;
     }
-
-    .progress-fill {
-        height: 100%;
-        background: var(--primary-color);
-        width: 0;
-        transition: width 0.3s ease;
-    }
-
-    .progress-status {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.9rem;
-        color: var(--light-text);
-    }
+    .probability { font-size: 0.8em; opacity: 0.8; }
 </style>
 {% endblock %}
 
@@ -109,12 +58,11 @@
             <div class="dropzone-text">
                 <p>اسحب وأفلت الملفات هنا</p>
                 <p>أو</p>
-                <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-                    <i class="fas fa-folder-open"></i>
-                    اختر الملفات
+                <button type="button" class="btn btn-primary" onclick="fileInput.click()">
+                    <i class="fas fa-folder-open"></i> اختر الملفات
                 </button>
             </div>
-            <input type="file" id="fileInput" multiple style="display: none">
+            <input type="file" id="fileInput" multiple style="display: none;">
         </div>
 
         <div id="fileList" class="file-list"></div>
@@ -136,64 +84,11 @@
             <span class="scan-time">وقت الفحص: <time id="scanTime"></time></span>
         </div>
 
-        <div class="result-cards">
-            <!-- بطاقة الإحصائيات -->
-            <div class="result-card">
-                <div class="card-header">
-                    <i class="fas fa-chart-pie"></i>
-                    <h3>إحصائيات الفحص</h3>
-                </div>
-                <div class="card-body">
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-label">الملفات المفحوصة</div>
-                            <div class="stat-value" id="scannedFiles">0</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">التهديدات المكتشفة</div>
-                            <div class="stat-value" id="detectedThreats">0</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">الملفات الآمنة</div>
-                            <div class="stat-value" id="safeFiles">0</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div id="resultDetails"></div>
 
-            <!-- بطاقة التهديدات -->
-            <div class="result-card">
-                <div class="card-header">
-                    <i class="fas fa-virus"></i>
-                    <h3>التهديدات المكتشفة</h3>
-                </div>
-                <div class="card-body">
-                    <ul id="threatsList" class="threats-list">
-                        <li class="no-threats">لم يتم اكتشاف تهديدات</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- بطاقة التوصيات -->
-            <div class="result-card">
-                <div class="card-header">
-                    <i class="fas fa-lightbulb"></i>
-                    <h3>التوصيات</h3>
-                </div>
-                <div class="card-body">
-                    <ul id="recommendationsList" class="recommendations-list"></ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="action-buttons">
+        <div class="action-buttons mt-4">
             <button class="btn btn-secondary" onclick="saveScanReport()">
-                <i class="fas fa-download"></i>
-                حفظ التقرير
-            </button>
-            <button class="btn btn-primary" onclick="shareScanResults()">
-                <i class="fas fa-share-alt"></i>
-                مشاركة النتائج
+                <i class="fas fa-download"></i> حفظ التقرير
             </button>
         </div>
     </div>
@@ -209,25 +104,10 @@
     const scanResults = document.getElementById('scanResults');
     let files = [];
 
-    // إعداد منطقة السحب والإفلات
-    dropzone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropzone.classList.add('dragover');
-    });
-
-    dropzone.addEventListener('dragleave', () => {
-        dropzone.classList.remove('dragover');
-    });
-
-    dropzone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropzone.classList.remove('dragover');
-        handleFiles(e.dataTransfer.files);
-    });
-
-    fileInput.addEventListener('change', (e) => {
-        handleFiles(e.target.files);
-    });
+    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+    fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
     function handleFiles(newFiles) {
         files = [...files, ...Array.from(newFiles)];
@@ -237,9 +117,9 @@
     function updateFileList() {
         fileList.innerHTML = '';
         files.forEach((file, index) => {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            fileItem.innerHTML = `
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.innerHTML = `
                 <i class="fas ${getFileIcon(file.type)} file-icon"></i>
                 <div class="file-info">
                     <div class="file-name">${file.name}</div>
@@ -251,15 +131,15 @@
                     </button>
                 </div>
             `;
-            fileList.appendChild(fileItem);
+            fileList.appendChild(div);
         });
 
         if (files.length > 0) {
-            const scanButton = document.createElement('button');
-            scanButton.className = 'btn btn-primary mt-3';
-            scanButton.innerHTML = '<i class="fas fa-search"></i> بدء الفحص';
-            scanButton.onclick = startScan;
-            fileList.appendChild(scanButton);
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-primary mt-3';
+            btn.textContent = 'بدء الفحص';
+            btn.onclick = startScan;
+            fileList.appendChild(btn);
         }
     }
 
@@ -272,19 +152,18 @@
             'text/': 'fa-file-text',
             'application/zip': 'fa-file-archive'
         };
-
-        for (const [key, value] of Object.entries(icons)) {
-            if (type.includes(key)) return value;
+        for (const key in icons) {
+            if (type.includes(key)) return icons[key];
         }
         return 'fa-file';
     }
 
     function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
+        if (!bytes) return '0 Bytes';
         const k = 1024;
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
     }
 
     function removeFile(index) {
@@ -292,64 +171,74 @@
         updateFileList();
     }
 
-    function startScan() {
+    async function startScan() {
         scanProgress.style.display = 'block';
-        simulateScanProgress();
+        scanResults.style.display = 'none';
+
+        const form = new FormData();
+        files.forEach(f => form.append('pe_file', f));
+
+        let data;
+        try {
+            const resp = await fetch('/file_check', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
+            if (!resp.ok) { const txt = await resp.text(); throw new Error(txt || `HTTP ${resp.status}`); }
+            data = await resp.json();
+        } catch (e) {
+            alert(`خطأ أثناء الفحص: ${e.message}`);
+            scanProgress.style.display = 'none';
+            return;
+        }
+
+        renderResults(data);
+        scanProgress.style.display = 'none';
     }
 
-    function simulateScanProgress() {
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 1;
-            document.getElementById('progressFill').style.width = `${progress}%`;
-            document.getElementById('progressPercent').textContent = `${progress}%`;
-            
-            if (progress >= 100) {
-                clearInterval(interval);
-                showResults();
-            }
-        }, 50);
-    }
-
-    function showResults() {
+    function renderResults(data) {
         scanResults.style.display = 'block';
         document.getElementById('scanTime').textContent = new Date().toLocaleTimeString('ar-SA');
-        
-        // تحديث الإحصائيات
-        document.getElementById('scannedFiles').textContent = files.length;
-        document.getElementById('safeFiles').textContent = files.length - 1;
-        document.getElementById('detectedThreats').textContent = '1';
-
-        // إضافة التهديدات
-        const threatsList = document.getElementById('threatsList');
-        threatsList.innerHTML = `
-            <li class="threat-item">
-                <div class="threat-header">
-                    <i class="fas fa-virus"></i>
-                    <span class="threat-name">برمجية خبيثة</span>
-                    <span class="threat-severity high">خطورة عالية</span>
-                </div>
-                <div class="threat-details">
-                    تم اكتشاف برمجية خبيثة في الملف example.exe
-                </div>
-            </li>
-        `;
-
-        // إضافة التوصيات
-        const recommendationsList = document.getElementById('recommendationsList');
-        recommendationsList.innerHTML = `
-            <li><i class="fas fa-check-circle"></i> حذف الملفات المصابة</li>
-            <li><i class="fas fa-check-circle"></i> تحديث برامج الحماية</li>
-            <li><i class="fas fa-check-circle"></i> فحص النظام بالكامل</li>
-        `;
+        document.getElementById('resultDetails').innerHTML = renderResultItem(data.result);
     }
+
+    function renderResultItem(item, level = 0) {
+        const cls = getRiskClass(item.label || '');
+        let html = `
+        <div class="file-details" style="margin-left:${level * 20}px">
+            <div class="result-grid">
+                <div class="grid-row"><span class="grid-label">اسم الملف:</span><span class="grid-value">${item.filename || '-'}</span></div>
+                <div class="grid-row"><span class="grid-label">النوع:</span><span class="grid-value">${item.file_type || '-'}</span></div>
+                <div class="grid-row"><span class="grid-label">الهاش:</span><span class="grid-value hash-code">${item.hash_sha256 || '-'}</span></div>
+                <div class="grid-row"><span class="grid-label">الحالة:</span><span class="grid-value"><span class="risk-badge ${cls}">${item.label || 'غير معروف'}<span class="probability">(${item.probability || 0}%)</span></span></span></div>
+            </div>
+        `;
+
+        if (item.details) {
+            html += `
+            <div class="details-section">
+                <div class="section-title">التفاصيل الفنية:</div>
+                <pre class="details-content">${JSON.stringify(item.details, null, 2)}</pre>
+            </div>
+            `;
+        }
+
+        if (item.nested_results) {
+            html += `<div class="nested-results">`;
+            item.nested_results.forEach(sub => {
+                html += renderResultItem(sub, level + 1);
+            });
+            html += `</div>`;
+        }
+
+        return html + '</div>';
+    }
+
+    function getRiskClass(label) { switch (label.toLowerCase()) { case 'ضار': return 'risk-malicious'; case 'مشبوه': return 'risk-suspicious'; default: return 'risk-safe'; } }
 
     function saveScanReport() {
-        alert('جاري حفظ التقرير...');
-    }
-
-    function shareScanResults() {
-        alert('جاري مشاركة النتائج...');
+        const txt = document.getElementById('resultDetails').innerText;
+        const blob = new Blob([txt], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `phishguard-report-${Date.now()}.txt`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
     }
 </script>
-{% endblock %} 
+{% endblock %}

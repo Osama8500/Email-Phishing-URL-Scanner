@@ -4,9 +4,47 @@
 
 {% block extra_css %}
 <style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --container-bg: #fff;
+        --text-color: #333;
+        --text-color-light: #666;
+        --border-color: #ddd;
+        --primary-color: #1976d2;
+        --light-text: #666;
+    }
+
+    [data-theme="dark"] {
+        --glass-bg: rgba(0, 0, 0, 0.2);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --container-bg: #1a1a2e;
+        --text-color: #e0e0e0;
+        --text-color-light: #90a4ae;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --primary-color: #42a5f5;
+        --light-text: #90a4ae;
+    }
+
     .settings-container {
         max-width: 800px;
         margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .scan-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .scan-header h1 {
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+        color: var(--light-text);
+        font-size: 1.1rem;
     }
 
     .settings-section {
@@ -15,6 +53,7 @@
         border-radius: 16px;
         padding: 1.5rem;
         margin-bottom: 2rem;
+        backdrop-filter: blur(10px);
     }
 
     .settings-section h2 {
@@ -52,6 +91,11 @@
         justify-content: space-between;
         padding: 1rem;
         border-bottom: 1px solid var(--border-color);
+        transition: background-color 0.3s ease;
+    }
+
+    .setting-item:hover {
+        background: var(--glass-bg);
     }
 
     .setting-item:last-child {
@@ -65,6 +109,7 @@
     .setting-title {
         font-weight: 600;
         margin-bottom: 0.25rem;
+        color: var(--text-color);
     }
 
     .setting-description {
@@ -130,25 +175,23 @@
         padding: 0.5rem 1rem;
         color: var(--text-color);
         min-width: 200px;
+        transition: all 0.3s ease;
     }
 
-    /* تخصيص حقول الإدخال */
-    .settings-input {
-        background: var(--container-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 0.5rem 1rem;
-        color: var(--text-color);
-        min-width: 200px;
+    .settings-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+        outline: none;
     }
 
-    .api-key-input {
-        display: flex;
-        gap: 0.5rem;
+    /* تحسينات إضافية */
+    .settings-section {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .api-key-input input {
-        flex: 1;
+    .settings-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
 </style>
 {% endblock %}
@@ -170,60 +213,13 @@
             <div class="setting-item">
                 <div class="setting-label">
                     <div class="setting-title">الوضع المظلم</div>
-                    <div class="setting-description">تفعيل الوضع المظلم للواجهة</div>
+                    <div class="setting-description">تمكين الوضع المظلم للواجهة</div>
                 </div>
                 <div class="setting-control">
                     <label class="switch">
                         <input type="checkbox" id="darkModeToggle">
                         <span class="slider"></span>
                     </label>
-                </div>
-            </div>
-            <div class="setting-item">
-                <div class="setting-label">
-                    <div class="setting-title">اللغة</div>
-                    <div class="setting-description">اختيار لغة الواجهة</div>
-                </div>
-                <div class="setting-control">
-                    <select class="settings-select" id="languageSelect">
-                        <option value="ar">العربية</option>
-                        <option value="en">English</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- إعدادات الأمان -->
-    <div class="settings-section">
-        <h2>
-            <i class="fas fa-shield-alt"></i>
-            إعدادات الأمان
-        </h2>
-        <div class="settings-group">
-            <div class="setting-item">
-                <div class="setting-label">
-                    <div class="setting-title">التحقق من خطوتين</div>
-                    <div class="setting-description">تفعيل المصادقة الثنائية لحسابك</div>
-                </div>
-                <div class="setting-control">
-                    <label class="switch">
-                        <input type="checkbox" id="twoFactorToggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-            </div>
-            <div class="setting-item">
-                <div class="setting-label">
-                    <div class="setting-title">مستوى الحماية</div>
-                    <div class="setting-description">تحديد مستوى الحماية للفحص</div>
-                </div>
-                <div class="setting-control">
-                    <select class="settings-select" id="securityLevel">
-                        <option value="high">عالي</option>
-                        <option value="medium">متوسط</option>
-                        <option value="low">منخفض</option>
-                    </select>
                 </div>
             </div>
         </div>
@@ -238,12 +234,12 @@
         <div class="settings-group">
             <div class="setting-item">
                 <div class="setting-label">
-                    <div class="setting-title">إشعارات سطح المكتب</div>
-                    <div class="setting-description">تفعيل إشعارات سطح المكتب للتنبيهات</div>
+                    <div class="setting-title">الإشعارات المباشرة</div>
+                    <div class="setting-description">تلقي إشعارات فورية عن النشاطات المهمة</div>
                 </div>
                 <div class="setting-control">
                     <label class="switch">
-                        <input type="checkbox" id="desktopNotificationsToggle">
+                        <input type="checkbox" id="pushNotificationsToggle">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -251,7 +247,7 @@
             <div class="setting-item">
                 <div class="setting-label">
                     <div class="setting-title">إشعارات البريد الإلكتروني</div>
-                    <div class="setting-description">تلقي تنبيهات عبر البريد الإلكتروني</div>
+                    <div class="setting-description">تلقي تحديثات عبر البريد الإلكتروني</div>
                 </div>
                 <div class="setting-control">
                     <label class="switch">
@@ -262,161 +258,27 @@
             </div>
         </div>
     </div>
-
-    <!-- إعدادات API -->
-    <div class="settings-section">
-        <h2>
-            <i class="fas fa-key"></i>
-            إعدادات API
-        </h2>
-        <div class="settings-group">
-            <div class="setting-item">
-                <div class="setting-label">
-                    <div class="setting-title">مفتاح VirusTotal API</div>
-                    <div class="setting-description">مفتاح API للتكامل مع خدمة VirusTotal</div>
-                </div>
-                <div class="setting-control">
-                    <div class="api-key-input">
-                        <input type="password" class="settings-input" id="virusTotalKey" placeholder="أدخل مفتاح API">
-                        <button class="btn btn-secondary" onclick="toggleApiKeyVisibility('virusTotalKey')">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="setting-item">
-                <div class="setting-label">
-                    <div class="setting-title">مفتاح PhishTank API</div>
-                    <div class="setting-description">مفتاح API للتكامل مع خدمة PhishTank</div>
-                </div>
-                <div class="setting-control">
-                    <div class="api-key-input">
-                        <input type="password" class="settings-input" id="phishTankKey" placeholder="أدخل مفتاح API">
-                        <button class="btn btn-secondary" onclick="toggleApiKeyVisibility('phishTankKey')">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="action-buttons">
-        <button class="btn btn-secondary" onclick="resetSettings()">
-            <i class="fas fa-undo"></i>
-            إعادة تعيين
-        </button>
-        <button class="btn btn-primary" onclick="saveSettings()">
-            <i class="fas fa-save"></i>
-            حفظ التغييرات
-        </button>
-    </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-    // تحميل الإعدادات المحفوظة
+    // تهيئة حالة الوضع المظلم
     document.addEventListener('DOMContentLoaded', function() {
-        loadSettings();
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const currentTheme = localStorage.getItem('theme');
+        
+        if (currentTheme === 'dark') {
+            darkModeToggle.checked = true;
+        }
+
+        darkModeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }
+        });
     });
-
-    function loadSettings() {
-        // استرجاع الإعدادات من localStorage
-        const settings = JSON.parse(localStorage.getItem('settings')) || getDefaultSettings();
-        
-        // تطبيق الإعدادات
-        document.getElementById('darkModeToggle').checked = settings.darkMode;
-        document.getElementById('languageSelect').value = settings.language;
-        document.getElementById('twoFactorToggle').checked = settings.twoFactor;
-        document.getElementById('securityLevel').value = settings.securityLevel;
-        document.getElementById('desktopNotificationsToggle').checked = settings.desktopNotifications;
-        document.getElementById('emailNotificationsToggle').checked = settings.emailNotifications;
-        
-        // تطبيق مفاتيح API (إذا كانت موجودة)
-        if (settings.virusTotalKey) {
-            document.getElementById('virusTotalKey').value = settings.virusTotalKey;
-        }
-        if (settings.phishTankKey) {
-            document.getElementById('phishTankKey').value = settings.phishTankKey;
-        }
-    }
-
-    function getDefaultSettings() {
-        return {
-            darkMode: false,
-            language: 'ar',
-            twoFactor: false,
-            securityLevel: 'medium',
-            desktopNotifications: true,
-            emailNotifications: false,
-            virusTotalKey: '',
-            phishTankKey: ''
-        };
-    }
-
-    function saveSettings() {
-        const settings = {
-            darkMode: document.getElementById('darkModeToggle').checked,
-            language: document.getElementById('languageSelect').value,
-            twoFactor: document.getElementById('twoFactorToggle').checked,
-            securityLevel: document.getElementById('securityLevel').value,
-            desktopNotifications: document.getElementById('desktopNotificationsToggle').checked,
-            emailNotifications: document.getElementById('emailNotificationsToggle').checked,
-            virusTotalKey: document.getElementById('virusTotalKey').value,
-            phishTankKey: document.getElementById('phishTankKey').value
-        };
-
-        // حفظ الإعدادات في localStorage
-        localStorage.setItem('settings', JSON.stringify(settings));
-
-        // تطبيق الإعدادات مباشرة
-        applySettings(settings);
-
-        // عرض رسالة نجاح
-        showNotification('تم حفظ الإعدادات بنجاح');
-    }
-
-    function resetSettings() {
-        if (confirm('هل أنت متأكد من إعادة تعيين جميع الإعدادات؟')) {
-            localStorage.removeItem('settings');
-            loadSettings();
-            showNotification('تم إعادة تعيين الإعدادات');
-        }
-    }
-
-    function applySettings(settings) {
-        // تطبيق الوضع المظلم
-        document.documentElement.setAttribute('data-theme', settings.darkMode ? 'dark' : 'light');
-        
-        // يمكن إضافة المزيد من التطبيقات المباشرة للإعدادات هنا
-    }
-
-    function toggleApiKeyVisibility(inputId) {
-        const input = document.getElementById(inputId);
-        const icon = event.currentTarget.querySelector('i');
-        
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    }
-
-    function showNotification(message) {
-        // يمكن استبدال هذا بمكتبة إشعارات أفضل
-        alert(message);
-    }
-
-    // مراقبة التغييرات في الإعدادات
-    document.getElementById('darkModeToggle').addEventListener('change', function(e) {
-        document.documentElement.setAttribute('data-theme', e.target.checked ? 'dark' : 'light');
-    });
-
-    // يمكن إضافة المزيد من معالجات الأحداث للإعدادات الأخرى
 </script>
 {% endblock %} 

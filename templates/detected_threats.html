@@ -1,111 +1,303 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="light">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>التهديدات المكتشفة - PhishGuard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body>
-    {% include 'navbar.html' %}
+{% extends "base.html" %}
 
-    <main class="main-content">
-        <div class="threats-container">
-            <div class="threats-header">
-                <h1>التهديدات المكتشفة</h1>
-                <div class="threats-filters">
-                    <select class="filter-select">
-                        <option value="all">جميع التهديدات</option>
-                        <option value="high">خطورة عالية</option>
-                        <option value="medium">خطورة متوسطة</option>
-                        <option value="low">خطورة منخفضة</option>
-                    </select>
-                    <select class="filter-select">
-                        <option value="all">جميع الأنواع</option>
-                        <option value="phishing">تصيد احتيالي</option>
-                        <option value="malware">برمجيات خبيثة</option>
-                        <option value="suspicious">روابط مشبوهة</option>
-                    </select>
-                    <button class="btn btn-primary">
-                        <i class="fas fa-file-export"></i>
-                        تصدير التقرير
-                    </button>
+{% block title %}PhishGuard - التهديدات المكتشفة{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --container-bg: #fff;
+        --text-color: #333;
+        --text-color-light: #666;
+        --border-color: #ddd;
+        --primary-color: #1976d2;
+        --light-text: #666;
+        --card-bg: #fff;
+        --hover-bg: #f5f5f5;
+        --danger-color: #dc3545;
+        --warning-color: #ffc107;
+        --success-color: #28a745;
+    }
+
+    [data-theme="dark"] {
+        --glass-bg: rgba(0, 0, 0, 0.2);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --container-bg: #1a1a2e;
+        --text-color: #e0e0e0;
+        --text-color-light: #90a4ae;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --primary-color: #42a5f5;
+        --light-text: #90a4ae;
+        --card-bg: #1a1a2e;
+        --hover-bg: #252525;
+    }
+
+    .threats-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .threats-header {
+        margin-bottom: 2rem;
+    }
+
+    .threats-header h1 {
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .threats-filters {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        min-width: 200px;
+    }
+
+    .filter-select:hover {
+        border-color: var(--primary-color);
+    }
+
+    .threats-list {
+        display: grid;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .threat-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        transition: transform 0.3s ease;
+    }
+
+    .threat-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .threat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .threat-icon.phishing {
+        background: var(--danger-color);
+    }
+
+    .threat-icon.malware {
+        background: var(--warning-color);
+    }
+
+    .threat-icon.suspicious {
+        background: var(--primary-color);
+    }
+
+    .threat-info {
+        flex: 1;
+    }
+
+    .threat-info h3 {
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .threat-description {
+        color: var(--text-color-light);
+        margin-bottom: 1rem;
+    }
+
+    .threat-details {
+        display: flex;
+        gap: 1.5rem;
+        color: var(--text-color-light);
+        font-size: 0.9rem;
+    }
+
+    .threat-details span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .threat-severity {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 1rem;
+    }
+
+    .severity-badge {
+        padding: 0.25rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .severity-badge.high {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    .severity-badge.medium {
+        background: var(--warning-color);
+        color: black;
+    }
+
+    .severity-badge.low {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .threat-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-secondary {
+        background: var(--glass-bg);
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-danger {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    .threats-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+        color: var(--text-color);
+    }
+
+    .pagination-btn {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .pagination-btn:not(:disabled):hover {
+        background: var(--primary-color);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="threats-container">
+    <div class="threats-header">
+        <h1>التهديدات المكتشفة</h1>
+        <div class="threats-filters">
+            <select class="filter-select">
+                <option value="all">جميع التهديدات</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="threats-list">
+        {% for threat in threats %}
+        <div class="threat-card">
+            <div class="threat-icon {{ threat.type }}">
+                <i class="fas fa-{{ threat.icon }}"></i>
+            </div>
+            <div class="threat-info">
+                <h3>{{ threat.name }}</h3>
+                <p class="threat-description">{{ threat.description }}</p>
+                <div class="threat-details">
+                    <span class="threat-type">
+                        <i class="fas fa-tag"></i>
+                        {{ threat.type }}
+                    </span>
+                    <span class="threat-date">
+                        <i class="fas fa-calendar"></i>
+                        {{ threat.date }}
+                    </span>
+                    <span class="threat-source">
+                        <i class="fas fa-globe"></i>
+                        {{ threat.source }}
+                    </span>
                 </div>
             </div>
-
-            <div class="threats-list">
-                {% for threat in threats %}
-                <div class="threat-card">
-                    <div class="threat-icon {{ threat.type }}">
-                        <i class="fas fa-{{ threat.icon }}"></i>
-                    </div>
-                    <div class="threat-info">
-                        <h3>{{ threat.name }}</h3>
-                        <p class="threat-description">{{ threat.description }}</p>
-                        <div class="threat-details">
-                            <span class="threat-type">
-                                <i class="fas fa-tag"></i>
-                                {{ threat.type }}
-                            </span>
-                            <span class="threat-date">
-                                <i class="fas fa-calendar"></i>
-                                {{ threat.date }}
-                            </span>
-                            <span class="threat-source">
-                                <i class="fas fa-globe"></i>
-                                {{ threat.source }}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="threat-severity {{ threat.severity }}">
-                        <span class="severity-badge">{{ threat.severity }}</span>
-                        <div class="threat-actions">
-                            <button class="btn btn-secondary btn-sm">
-                                <i class="fas fa-eye"></i>
-                                التفاصيل
-                            </button>
-                            <button class="btn btn-danger btn-sm">
-                                <i class="fas fa-shield"></i>
-                                حظر
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-
-            <div class="threats-pagination">
-                <button class="pagination-btn" disabled>
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-                <span class="pagination-current">1</span>
-                <span class="pagination-separator">/</span>
-                <span class="pagination-total">5</span>
-                <button class="pagination-btn">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
+            <div class="threat-severity">
+                {% if threat.severity == 'high' %}
+                <span class="severity-badge {{ threat.severity }}">{{ threat.severity }}</span>
+                {% endif %}
             </div>
         </div>
-    </main>
+        {% endfor %}
+    </div>
 
-    <script>
-        // تحديث الفلاتر
-        document.querySelectorAll('.filter-select').forEach(select => {
-            select.addEventListener('change', function() {
-                // يمكن إضافة منطق تحديث القائمة هنا
-            });
-        });
+    <div class="threats-pagination">
+        <button class="pagination-btn" disabled>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        <span class="pagination-current">1</span>
+        <span class="pagination-separator">/</span>
+        <span class="pagination-total">5</span>
+        <button class="pagination-btn">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+    </div>
+</div>
+{% endblock %}
 
-        // تحديث الصفحات
-        document.querySelectorAll('.pagination-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                if (!this.disabled) {
-                    // يمكن إضافة منطق تغيير الصفحة هنا
-                }
-            });
+{% block extra_js %}
+<script>
+    // تحديث الفلاتر
+    document.querySelectorAll('.filter-select').forEach(select => {
+        select.addEventListener('change', function() {
+            // يمكن إضافة منطق تحديث القائمة هنا
         });
-    </script>
-</body>
-</html> 
+    });
+
+    // تحديث الصفحات
+    document.querySelectorAll('.pagination-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            if (!this.disabled) {
+                // يمكن إضافة منطق تغيير الصفحة هنا
+            }
+        });
+    });
+</script>
+{% endblock %}

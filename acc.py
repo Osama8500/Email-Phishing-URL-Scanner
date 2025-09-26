@@ -19,8 +19,8 @@ X = df['body']
 y = df['label']
 
 # تحميل vectorizer والنموذج
-vectorizer = joblib.load('vec.pkl')
-model = joblib.load('spam.pkl')
+vectorizer = joblib.load('vector.pkl')
+model = joblib.load('spam_model.pkl')
 
 # تحويل النصوص إلى فيتشرات
 X_vectorized = vectorizer.transform(X)

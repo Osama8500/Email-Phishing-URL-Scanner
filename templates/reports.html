@@ -4,6 +4,28 @@
 
 {% block extra_css %}
 <style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --container-bg: #fff;
+        --text-color: #333;
+        --text-color-light: #666;
+        --border-color: #ddd;
+        --primary-color: #1976d2;
+        --light-text: #666;
+    }
+
+    [data-theme="dark"] {
+        --glass-bg: rgba(0, 0, 0, 0.2);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --container-bg: #1a1a2e;
+        --text-color: #e0e0e0;
+        --text-color-light: #90a4ae;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --primary-color: #42a5f5;
+        --light-text: #90a4ae;
+    }
+
     .reports-container {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

@@ -1,213 +1,276 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="light">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إحصائيات الفحص - PhishGuard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    {% include 'navbar.html' %}
+{% extends "base.html" %}
 
-    <main class="main-content">
-        <div class="statistics-container">
-            <div class="statistics-header">
-                <h1>إحصائيات الفحص</h1>
-                <div class="date-filter">
-                    <button class="btn btn-secondary active">اليوم</button>
-                    <button class="btn btn-secondary">الأسبوع</button>
-                    <button class="btn btn-secondary">الشهر</button>
-                    <button class="btn btn-secondary">السنة</button>
-                    <input type="date" class="date-input" />
-                    <button class="btn btn-primary">
-                        <i class="fas fa-sync"></i>
-                        تحديث
-                    </button>
+{% block title %}PhishGuard - إحصائيات الفحص{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --container-bg: #fff;
+        --text-color: #333;
+        --text-color-light: #666;
+        --border-color: #ddd;
+        --primary-color: #1976d2;
+        --light-text: #666;
+        --card-bg: #fff;
+        --hover-bg: #f5f5f5;
+        --chart-bg: #fff;
+    }
+
+    [data-theme="dark"] {
+        --glass-bg: rgba(0, 0, 0, 0.2);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --container-bg: #1a1a2e;
+        --text-color: #e0e0e0;
+        --text-color-light: #90a4ae;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --primary-color: #42a5f5;
+        --light-text: #90a4ae;
+        --card-bg: #1a1a2e;
+        --hover-bg: #252525;
+        --chart-bg: #1a1a2e;
+    }
+
+    .stats-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .stats-header {
+        margin-bottom: 2rem;
+        color: var(--text-color);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 15px;
+        padding: 1.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--primary-color);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .stat-title {
+        color: var(--text-color);
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-subtitle {
+        color: var(--text-color-light);
+        font-size: 0.9rem;
+    }
+
+    .chart-container {
+        background: var(--chart-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .chart-title {
+        color: var(--text-color);
+        font-size: 1.2rem;
+    }
+
+    .chart-filters {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .chart-filter {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .chart-filter:hover,
+    .chart-filter.active {
+        background: var(--primary-color);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="stats-container">
+    <div class="stats-header">
+        <h1>إحصائيات الفحص</h1>
+        <p>تحليل شامل لنتائج عمليات الفحص</p>
+    </div>
+
+    <div class="stats-grid">
+        <!-- إحصائيات فحص الروابط -->
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-link"></i>
                 </div>
             </div>
+            <div class="stat-title">فحص الروابط</div>
+            <div class="stat-value">{{ url_scans }}</div>
+            <div class="stat-subtitle">إجمالي عمليات فحص الروابط</div>
+        </div>
 
-            <!-- إحصائيات عامة -->
-            <div class="stats-overview">
-                <div class="stat-card success">
-                    <div class="stat-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-details">
-                        <h3>فحوصات ناجحة</h3>
-                        <p class="stat-number">{{ successful_scans }}</p>
-                        <span class="stat-change positive">
-                            <i class="fas fa-arrow-up"></i>
-                            5.2%
-                        </span>
-                    </div>
-                </div>
-                <div class="stat-card warning">
-                    <div class="stat-icon">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="stat-details">
-                        <h3>تحذيرات</h3>
-                        <p class="stat-number">{{ warnings }}</p>
-                        <span class="stat-change negative">
-                            <i class="fas fa-arrow-down"></i>
-                            2.1%
-                        </span>
-                    </div>
-                </div>
-                <div class="stat-card danger">
-                    <div class="stat-icon">
-                        <i class="fas fa-virus"></i>
-                    </div>
-                    <div class="stat-details">
-                        <h3>تهديدات</h3>
-                        <p class="stat-number">{{ threats }}</p>
-                        <span class="stat-change negative">
-                            <i class="fas fa-arrow-down"></i>
-                            8.4%
-                        </span>
-                    </div>
-                </div>
-                <div class="stat-card info">
-                    <div class="stat-icon">
-                        <i class="fas fa-tachometer-alt"></i>
-                    </div>
-                    <div class="stat-details">
-                        <h3>معدل الاستجابة</h3>
-                        <p class="stat-number">{{ response_rate }}ms</p>
-                        <span class="stat-change positive">
-                            <i class="fas fa-arrow-up"></i>
-                            3.7%
-                        </span>
-                    </div>
+        <!-- إحصائيات فحص البريد -->
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-envelope"></i>
                 </div>
             </div>
+            <div class="stat-title">فحص البريد</div>
+            <div class="stat-value">{{ email_scans }}</div>
+            <div class="stat-subtitle">إجمالي عمليات فحص البريد</div>
+        </div>
 
-            <!-- الرسوم البيانية التفصيلية -->
-            <div class="detailed-charts">
-                <div class="chart-card full-width">
-                    <h3>نشاط الفحص على مدار اليوم</h3>
-                    <canvas id="hourlyActivityChart"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3>توزيع أنواع الفحص</h3>
-                    <canvas id="scanTypesChart"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3>معدل النجاح</h3>
-                    <canvas id="successRateChart"></canvas>
+        <!-- إحصائيات فحص الملفات -->
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-file-shield"></i>
                 </div>
             </div>
+            <div class="stat-title">فحص الملفات</div>
+            <div class="stat-value">{{ file_scans }}</div>
+            <div class="stat-subtitle">إجمالي عمليات فحص الملفات</div>
+        </div>
+    </div>
 
-            <!-- جدول الإحصائيات التفصيلية -->
-            <div class="detailed-stats">
-                <h2>إحصائيات تفصيلية</h2>
-                <table class="stats-table">
-                    <thead>
-                        <tr>
-                            <th>نوع الفحص</th>
-                            <th>عدد العمليات</th>
-                            <th>نسبة النجاح</th>
-                            <th>متوسط الوقت</th>
-                            <th>التهديدات المكتشفة</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for stat in detailed_stats %}
-                        <tr>
-                            <td>{{ stat.type }}</td>
-                            <td>{{ stat.count }}</td>
-                            <td>{{ stat.success_rate }}%</td>
-                            <td>{{ stat.avg_time }}ms</td>
-                            <td>{{ stat.threats }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <!-- الرسم البياني -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <h2 class="chart-title">تحليل عمليات الفحص</h2>
+            <div class="chart-filters">
+                <button class="chart-filter active" data-period="week">أسبوع</button>
+                <button class="chart-filter" data-period="month">شهر</button>
+                <button class="chart-filter" data-period="year">سنة</button>
             </div>
         </div>
-    </main>
+        <canvas id="scanChart"></canvas>
+    </div>
+</div>
+{% endblock %}
 
-    <script>
-        // رسم بياني للنشاط اليومي
-        const hourlyCtx = document.getElementById('hourlyActivityChart').getContext('2d');
-        new Chart(hourlyCtx, {
-            type: 'line',
-            data: {
-                labels: Array.from({length: 24}, (_, i) => `${i}:00`),
-                datasets: [{
-                    label: 'عدد الفحوصات',
-                    data: [30, 25, 20, 15, 10, 8, 12, 20, 35, 45, 50, 55, 60, 58, 52, 48, 45, 40, 38, 35, 30, 28, 25, 22],
-                    borderColor: '#4a90e2',
-                    tension: 0.4,
-                    fill: true,
-                    backgroundColor: 'rgba(74, 144, 226, 0.1)'
-                }]
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // تهيئة الرسم البياني
+    const ctx = document.getElementById('scanChart').getContext('2d');
+    const scanChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
+            datasets: [{
+                label: 'عمليات الفحص',
+                data: [12, 19, 3, 5, 2, 3, 7],
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
+                    }
+                }
             },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
+                    },
+                    ticks: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
+                    }
+                },
+                x: {
+                    grid: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
+                    },
+                    ticks: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
                     }
                 }
             }
-        });
+        }
+    });
 
-        // رسم بياني لأنواع الفحص
-        const typesCtx = document.getElementById('scanTypesChart').getContext('2d');
-        new Chart(typesCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['فحص الروابط', 'فحص البريد', 'فحص الملفات'],
-                datasets: [{
-                    data: [45, 35, 20],
-                    backgroundColor: ['#4a90e2', '#2ecc71', '#f1c40f']
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
+    // تحديث ألوان الرسم البياني عند تغيير الوضع
+    document.addEventListener('themeChanged', function(e) {
+        const theme = e.detail.theme;
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color');
+        const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color');
+        
+        scanChart.options.plugins.legend.labels.color = textColor;
+        scanChart.options.scales.y.grid.color = borderColor;
+        scanChart.options.scales.x.grid.color = borderColor;
+        scanChart.options.scales.y.ticks.color = textColor;
+        scanChart.options.scales.x.ticks.color = textColor;
+        
+        scanChart.update();
+    });
 
-        // رسم بياني لمعدل النجاح
-        const successCtx = document.getElementById('successRateChart').getContext('2d');
-        new Chart(successCtx, {
-            type: 'bar',
-            data: {
-                labels: ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'],
-                datasets: [{
-                    label: 'معدل النجاح',
-                    data: [95, 92, 88, 95, 90, 87, 93],
-                    backgroundColor: '#2ecc71'
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100
-                    }
-                }
-            }
+    // تفعيل فلاتر الرسم البياني
+    document.querySelectorAll('.chart-filter').forEach(filter => {
+        filter.addEventListener('click', function() {
+            document.querySelectorAll('.chart-filter').forEach(f => f.classList.remove('active'));
+            this.classList.add('active');
+            // هنا يمكن إضافة منطق تحديث البيانات حسب الفترة المحددة
         });
-
-        // تحديث الفلاتر
-        document.querySelectorAll('.date-filter .btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.date-filter .btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                // يمكن إضافة منطق تحديث البيانات هنا
-            });
-        });
-    </script>
-</body>
-</html> 
+    });
+</script>
+{% endblock %} 

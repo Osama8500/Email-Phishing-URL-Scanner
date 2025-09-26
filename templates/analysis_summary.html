@@ -1,145 +1,140 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="light">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ملخص التحليلات - PhishGuard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- إضافة مكتبة Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    {% include 'navbar.html' %}
+{% extends "base.html" %}
 
-    <main class="main-content">
-        <div class="dashboard-container">
-            <h1 class="dashboard-title">ملخص التحليلات</h1>
-            
-            <!-- بطاقات الإحصائيات -->
-            <div class="stats-cards">
-                <div class="stat-card">
-                    <i class="fas fa-shield-check"></i>
-                    <h3>إجمالي الفحوصات</h3>
-                    <p class="stat-number">{{ total_scans }}</p>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-virus-slash"></i>
-                    <h3>تهديدات تم اكتشافها</h3>
-                    <p class="stat-number">{{ detected_threats }}</p>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-check-circle"></i>
-                    <h3>عناصر آمنة</h3>
-                    <p class="stat-number">{{ safe_items }}</p>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-clock"></i>
-                    <h3>متوسط وقت الفحص</h3>
-                    <p class="stat-number">{{ avg_scan_time }}s</p>
-                </div>
+{% block title %}ملخص التحليلات - PhishGuard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<main class="main-content">
+    <div class="dashboard-container">
+        <h1 class="dashboard-title">ملخص التحليلات</h1>
+        <!-- بطاقات الإحصائيات -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <i class="fas fa-shield-check"></i>
+                <h3>إجمالي الفحوصات</h3>
+                <p class="stat-number">{{ total_scans }}</p>
             </div>
-
-            <!-- الرسوم البيانية -->
-            <div class="charts-container">
-                <div class="chart-card">
-                    <h3>توزيع أنواع التهديدات</h3>
-                    <canvas id="threatsChart"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3>نشاط الفحص الأسبوعي</h3>
-                    <canvas id="activityChart"></canvas>
-                </div>
+            <div class="stat-card">
+                <i class="fas fa-virus-slash"></i>
+                <h3>تهديدات تم اكتشافها</h3>
+                <p class="stat-number">{{ detected_threats }}</p>
             </div>
-
-            <!-- آخر التحليلات -->
-            <div class="recent-analysis">
-                <h2>آخر التحليلات</h2>
-                <div class="analysis-table-container">
-                    <table class="analysis-table">
-                        <thead>
-                            <tr>
-                                <th>النوع</th>
-                                <th>التاريخ</th>
-                                <th>النتيجة</th>
-                                <th>مستوى الخطورة</th>
-                                <th>الإجراء</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for analysis in recent_analyses %}
-                            <tr>
-                                <td>{{ analysis.type }}</td>
-                                <td>{{ analysis.date }}</td>
-                                <td>{{ analysis.result }}</td>
-                                <td>
-                                    <span class="severity-badge {{ analysis.severity }}">
-                                        {{ analysis.severity }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-secondary btn-sm">التفاصيل</button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="stat-card">
+                <i class="fas fa-check-circle"></i>
+                <h3>عناصر آمنة</h3>
+                <p class="stat-number">{{ safe_items }}</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-clock"></i>
+                <h3>متوسط وقت الفحص</h3>
+                <p class="stat-number">{{ avg_scan_time }}s</p>
             </div>
         </div>
-    </main>
+        <!-- الرسوم البيانية -->
+        <div class="charts-container">
+            <div class="chart-card">
+                <h3>توزيع أنواع التهديدات</h3>
+                <canvas id="threatsChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>نشاط الفحص الأسبوعي</h3>
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+        <!-- آخر التحليلات -->
+        <div class="recent-analysis">
+            <h2>آخر التحليلات</h2>
+            <div class="analysis-table-container">
+                <table class="analysis-table">
+                    <thead>
+                        <tr>
+                            <th>النوع</th>
+                            <th>التاريخ</th>
+                            <th>النتيجة</th>
+                            <th>مستوى الخطورة</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for analysis in recent_analyses %}
+                        <tr>
+                            <td>{{ analysis.type }}</td>
+                            <td>{{ analysis.date }}</td>
+                            <td>{{ analysis.result }}</td>
+                            <td>
+                                <span class="severity-badge {{ analysis.severity }}">
+                                    {{ analysis.severity }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-secondary btn-sm" onclick="window.location.href='/reports/threats'">التفاصيل</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
 
-    <script>
-        // رسم بياني دائري لتوزيع التهديدات
-        const threatsCtx = document.getElementById('threatsChart').getContext('2d');
-        new Chart(threatsCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['تصيد احتيالي', 'برمجيات خبيثة', 'روابط مشبوهة', 'محتوى ضار'],
-                datasets: [{
-                    data: [40, 25, 20, 15],
-                    backgroundColor: [
-                        '#4a90e2',
-                        '#e74c3c',
-                        '#f1c40f',
-                        '#2ecc71'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
+{% block extra_js %}
+<!-- إضافة مكتبة Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // رسم بياني دائري لتوزيع التهديدات
+    const threatsCtx = document.getElementById('threatsChart').getContext('2d');
+    new Chart(threatsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['تصيد احتيالي', 'برمجيات خبيثة', 'روابط مشبوهة', 'محتوى ضار'],
+            datasets: [{
+                data: [40, 25, 20, 15],
+                backgroundColor: [
+                    '#4a90e2',
+                    '#e74c3c',
+                    '#f1c40f',
+                    '#2ecc71'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
                 }
             }
-        });
-
-        // رسم بياني خطي لنشاط الفحص
-        const activityCtx = document.getElementById('activityChart').getContext('2d');
-        new Chart(activityCtx, {
-            type: 'line',
-            data: {
-                labels: ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
-                datasets: [{
-                    label: 'عدد الفحوصات',
-                    data: [65, 59, 80, 81, 56, 55, 40],
-                    fill: false,
-                    borderColor: '#4a90e2',
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+        }
+    });
+    // رسم بياني خطي لنشاط الفحص
+    const activityCtx = document.getElementById('activityChart').getContext('2d');
+    new Chart(activityCtx, {
+        type: 'line',
+        data: {
+            labels: ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
+            datasets: [{
+                label: 'عدد الفحوصات',
+                data: [65, 59, 80, 81, 56, 55, 40],
+                fill: false,
+                borderColor: '#4a90e2',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
                 }
             }
-        });
-    </script>
-</body>
-</html> 
+        }
+    });
+</script>
+{% endblock %} 

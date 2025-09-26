@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block title %}PhishGuard - فحص الروابط{% endblock %}
@@ -372,6 +373,103 @@
             flex-direction: column;
         }
     }
+    .score-label {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: var(--text-color-light);
+}
+.score-display {
+  background: var(--bg-color);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;      /* ضع المحتوى في الوسط */
+  min-width: 150px;
+  border: 1px solid var(--border-color);
+}
+.btn-open-link {
+    background: #28a745;
+    color: white !important;
+    border: 1px solid #28a745;
+    padding: 0.8rem 2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-open-link:hover {
+    background: #218838;
+    border-color: #1e7e34;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.btn-open-link i {
+    font-size: 1.2rem;
+}
+/* تنسيقات الألوان الجديدة */
+.btn-open-link.safe-link {
+    background: #28a745;
+    border-color: #28a745;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-open-link.safe-link:hover {
+    background: #218838;
+    border-color: #1e7e34;
+}
+
+.btn-open-link.danger-link {
+    background: #dc3545;
+    border-color: #dc3545;
+    animation: pulse-danger 1.5s infinite;
+}
+
+.btn-open-link.danger-link:hover {
+    background: #c82333;
+    border-color: #bd2130;
+    animation: none;
+}
+
+@keyframes pulse-danger {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+/* إضافة رمز تحذير للروابط الخطرة */
+.btn-open-link.danger-link::after {
+    content: "!";
+    position: absolute;
+    right: -8px;
+    top: -12px;
+    font-size: 1.6rem;
+    color: #ffd700;
+    text-shadow: 0 0 8px rgba(0,0,0,0.3);
+    transform: rotate(20deg);
+}
+
+.suspicious-chars {
+    color: #ff4444;
+    font-weight: bold;
+    font-family: monospace;
+    border-bottom: 2px dotted #ff4444;
+    padding: 2px 4px;
+}
+.chars-list .suspicious-chars {
+        display: inline-block;
+        border: 1px solid #ff4444;
+        background: #ffecec;
+        padding: 0.4rem 0.6rem;
+        margin: 0.3rem;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 1.2rem;
+    }
 </style>
 {% endblock %}
 
@@ -383,15 +481,14 @@
     </div>
 
     <div id="scanFormContainer" class="scan-form-container" {% if url_res %}style="display: none;"{% endif %}>
-        <form id="urlScanForm" class="scan-form" method="POST">
+        <form id="urlScanForm" class="scan-form" method="POST" action="{{ url_for('url_check') }}">
             <div class="form-group">
                 <label for="url_text">أدخل الرابط للفحص</label>
                 <div class="input-group">
-                    <input type="url" id="url_text" name="url_text" class="form-control" 
-                           placeholder="https://example.com" required>
+                    <input type="url" id="url_text" name="url_text" class="form-control"
+                           placeholder="https://example.com" required value="{{ request.form.url_text or '' }}">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search"></i>
-                        فحص
+                        <i class="fas fa-search"></i> فحص
                     </button>
                 </div>
             </div>
@@ -399,34 +496,30 @@
     </div>
 
     {% if url_res %}
+    <div id="originalUrl" style="display:none;">{{ url_res.url }}</div>
     <div id="scanResults" class="scan-results">
         <div class="new-scan-button-container">
-            <button class="btn btn-outline new-scan-button" onclick="showScanForm()">
-                <i class="fas fa-search"></i>
-                فحص رابط جديد
+            <button class="btn-open-link {% if url_res.status == 'safe' %}safe-link{% else %}danger-link{% endif %}" onclick="openScannedUrl()">
+                <i class="fas fa-external-link-alt"></i>
+                {% if url_res.status == 'safe' %}رابط آمن  {% else %}رابط خطر {% endif %}
             </button>
-            <a href="/analysis_summary" class="btn btn-outline analysis-button">
-                <i class="fas fa-chart-bar"></i>
-                ملخص التحليلات
-            </a>
+            <button class="btn-outline new-scan-button" onclick="showScanForm()"><i class="fas fa-search"></i> فحص رابط جديد</button>
+            <a href="/reports/summary" class="analysis-button"><i class="fas fa-chart-bar"></i> ملخص التحليلات</a>
         </div>
 
         <div class="result-card {% if url_res.status == 'safe' %}safe{% else %}danger{% endif %}">
             <div class="result-content">
-                <div class="status-section">
+                <div class="status-section {% if url_res.status == 'safe' %}safe{% else %}danger{% endif %}">
                     <div class="status-indicator">
                         <i class="fas {% if url_res.status == 'safe' %}fa-shield-check{% else %}fa-exclamation-triangle{% endif %}"></i>
                         <div class="status-info">
-                            <span class="status-text">{{ 'آمن' if url_res.status == 'safe' else 'خطر' }}</span>
-                            <span class="status-description">{{ 'هذا الرابط آمن للاستخدام' if url_res.status == 'safe' else 'يرجى توخي الحذر مع هذا الرابط' }}</span>
+                            <span class="status-text">{{ 'آمن' if url_res.status=='safe' else 'خطر' }}</span>
+                            <span class="status-description">{{ 'هذا الرابط آمن للاستخدام' if url_res.status=='safe' else 'يرجى توخي الحذر مع هذا الرابط' }}</span>
                         </div>
                     </div>
-                    
                     <div class="score-display">
-                        <div class="score-content">
-                            <span class="score-number">{{ "%.2f"|format(url_res.probability) }}%</span>
-                            <span class="score-label">{{ 'درجة الأمان' if url_res.status == 'safe' else 'درجة الخطورة' }}</span>
-                        </div>
+                        <span class="score-number">{{ "%.2f"|format(url_res.probability) }}%</span>
+                        <span class="score-label">درجة الأمان</span>
                     </div>
                 </div>
 
@@ -435,17 +528,51 @@
                         <h3>النتيجة الرئيسية</h3>
                         <p class="main-reason">{{ url_res.reason }}</p>
                     </div>
-                    
+
                     {% if url_res.details %}
                     <div class="detail-list">
                         <h3>التفاصيل التقنية</h3>
                         <div class="details-grid">
-                        {% for detail in url_res.details %}
+                            {% for detail in url_res.details %}
                             <div class="detail-item">
-                                <i class="fas {% if url_res.status == 'safe' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+                                <i class="fas {% if url_res.status=='safe' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
                                 <span>{{ detail }}</span>
                             </div>
-                        {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- الأحرف غير القياسية (ديناميكي) -->
+                    <div class="detail-list" id="dynamic-special-chars" style="display: none;">
+                        <h3><i class="fas fa-exclamation-hexagon"></i> أحرف غير قياسية</h3>
+                        <div class="chars-list"></div>
+                    </div>
+
+                    {% if url_res.homograph_attacks %}
+                    <div class="detail-list">
+                        <h3><i class="fas fa-skull-crossbones"></i> هجمات أحرف مزيّفة</h3>
+                        <div class="chars-grid">
+                            {% for attack in url_res.homograph_attacks %}
+                            <div class="homograph-card">
+                                <div class="url-comparison">
+                                    <span class="fake-url"><i class="fas fa-link"></i> {{ attack.original_url }}</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                    <span class="real-url">{{ attack.mimicked_domain }} <i class="fas fa-shield-check"></i></span>
+                                </div>
+                                <div class="chars-grid">
+                                    {% for char in attack.suspicious_chars %}
+                                    <div class="char-card">
+                                        <div class="char-display">{{ char.char }}</div>
+                                        <div class="char-details">
+                                            <span>Unicode: {{ char.code }}</span><br>
+                                            <span>النوع: {{ char.category }}</span>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
                         </div>
                     </div>
                     {% endif %}
@@ -453,29 +580,14 @@
                     <div class="recommendations">
                         <h3>التوصيات</h3>
                         <ul class="recommendations-list">
-                        {% if url_res.status == 'safe' %}
-                            <li>
-                                <i class="fas fa-check"></i>
-                                <span>يمكنك استخدام هذا الرابط بأمان</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-info-circle"></i>
-                                <span>من المستحسن دائماً توخي الحذر عند إدخال معلومات شخصية</span>
-                            </li>
-                        {% else %}
-                            <li>
-                                <i class="fas fa-ban"></i>
-                                <span>لا ينصح باستخدام هذا الرابط</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-shield-alt"></i>
-                                <span>تجنب إدخال أي معلومات شخصية أو حساسة</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <span>قم بإبلاغ مصدر الرابط إذا تلقيته من جهة معروفة</span>
-                            </li>
-                        {% endif %}
+                            {% if url_res.status=='safe' %}
+                            <li><i class="fas fa-check"></i> يمكنك استخدام هذا الرابط بأمان</li>
+                            <li><i class="fas fa-info-circle"></i> من المستحسن دائماً توخي الحذر عند إدخال معلومات شخصية</li>
+                            {% else %}
+                            <li><i class="fas fa-ban"></i> لا ينصح باستخدام هذا الرابط</li>
+                            <li><i class="fas fa-shield-alt"></i> تجنب إدخال أي معلومات شخصية</li>
+                            <li><i class="fas fa-exclamation-triangle"></i> قم بإبلاغ مصدر الرابط إذا تلقيته من جهة معروفة</li>
+                            {% endif %}
                         </ul>
                     </div>
                 </div>
@@ -483,18 +595,9 @@
         </div>
 
         <div class="action-buttons">
-            <button class="btn btn-outline" onclick="showScanForm()">
-                <i class="fas fa-search"></i>
-                فحص رابط جديد
-            </button>
-            <button class="btn btn-secondary" onclick="window.print()">
-                <i class="fas fa-download"></i>
-                حفظ التقرير
-            </button>
-            <button class="btn btn-primary" onclick="shareResults()">
-                <i class="fas fa-share-alt"></i>
-                مشاركة النتائج
-            </button>
+            <button class="btn-outline" onclick="showScanForm()"><i class="fas fa-search"></i> فحص رابط جديد</button>
+            <button class="btn btn-secondary" onclick="saveUrlReport()"><i class="fas fa-download"></i> حفظ التقرير</button>
+            <button class="btn btn-primary" onclick="shareResults()"><i class="fas fa-share-alt"></i> مشاركة النتائج</button>
         </div>
     </div>
     {% endif %}
@@ -503,49 +606,67 @@
 
 {% block extra_js %}
 <script>
+window.addEventListener('DOMContentLoaded', function() {
+    // اكتشاف الأحرف غير ASCII في الرابط
+    var orig = document.getElementById('originalUrl').innerText || '';
+    var chars = Array.from(orig).filter(c => c.charCodeAt(0) > 127);
+    if (chars.length) {
+        var container = document.getElementById('dynamic-special-chars');
+        var list = container.querySelector('.chars-list');
+        chars.forEach(function(ch) {
+    var span = document.createElement('span');
+    span.className = 'suspicious-chars';
+    span.textContent = ch;
+    list.appendChild(span);
+});
+
+        container.style.display = 'block';
+    }
+});
+// فتح الرابط مباشرة
+    function openScannedUrl() {
+    const originalUrl = document.getElementById('originalUrl').innerText;
+    if (originalUrl) {
+        window.open(originalUrl, '_blank');
+    } else {
+        alert('الرابط غير موجود');
+    }
+}
 // مشاركة النتائج
 function shareResults() {
     if (navigator.share) {
-        navigator.share({
-            title: 'نتائج فحص الرابط',
-            text: document.querySelector('.main-reason').textContent,
-            url: window.location.href
-        })
-        .catch(console.error);
-    } else {
-        alert('مشاركة النتائج غير متاحة في متصفحك');
-    }
+        navigator.share({ title: 'نتائج فحص الرابط', text: document.querySelector('.main-reason').textContent, url: window.location.href })
+            .catch(console.error);
+    } else { alert('مشاركة النتائج غير متاحة في متصفحك'); }
 }
-
 // إظهار نموذج الفحص
 function showScanForm() {
-    var formContainer = document.getElementById('scanFormContainer');
-    var resultsContainer = document.getElementById('scanResults');
-    
-    formContainer.style.display = 'block';
-    formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('scanFormContainer').style.display = 'block';
+    document.getElementById('scanResults').style.display = 'none';
+    document.getElementById('scanFormContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-
-// التمرير إلى النتائج بعد تقديم النموذج وإعادة التحميل
+// حفظ تقرير الرابط
+function saveUrlReport() {
+    const original = document.getElementById('originalUrl').innerText;
+    const details = document.getElementById('scanResults').innerText;
+    const content = ['الرابط المفحوص:\n' + original + '\n', '--- نتائج الفحص ---\n' + details];
+    const blob = new Blob([content.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `phishguard-url-report-${Date.now()}.txt`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+// بعد تحميل الصفحة
 window.addEventListener('DOMContentLoaded', function() {
-    var results = document.getElementById('scanResults');
-    if (results) {
-        results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    
-    // إضافة معالج الحدث لنموذج الفحص
-    var form = document.getElementById('urlScanForm');
-    if (form) {
-        form.addEventListener('submit', function() {
-            // إظهار مؤشر التحميل أو رسالة
-            var loadingElement = document.createElement('div');
-            loadingElement.className = 'loading-indicator';
-            loadingElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الفحص...';
-            document.querySelector('.scan-container').appendChild(loadingElement);
-        });
-    }
+    if (document.getElementById('scanResults')) { document.getElementById('scanResults').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    const form = document.getElementById('urlScanForm');
+    if (form) { form.addEventListener('submit', function() {
+            const loading = document.createElement('div'); loading.className = 'loading-indicator';
+            loading.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الفحص...';
+            document.querySelector('.scan-container').appendChild(loading);
+        }); }
 });
 </script>
+
 
 <style>
     /* أنماط مؤشر التحميل */

@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}أفضل الممارسات الأمنية - PhishGuard{% endblock %}
+
+{% block extra_css %}
+<style>
+.best-practices-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 2rem;
+  color: var(--text-color);
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  display: block;
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(to right, var(--primary-color), var(--secondary-color), var(--accent-color));
+  margin: 1rem auto 0;
+  border-radius: 2px;
+}
+
+.timeline {
+  position: relative;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.timeline-card {
+  position: relative;
+  width: calc(50% - 40px);
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px var(--shadow-color);
+  background: var(--card-bg);
+  transition: all 0.3s ease;
+}
+
+.timeline-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 25px var(--shadow-hover);
+}
+
+.timeline-icon {
+  position: absolute;
+  top: 1.5rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  background: var(--accent-color);
+  z-index: 2;
+}
+
+.timeline-card:nth-child(odd) {
+  margin-right: auto;
+}
+
+.timeline-card:nth-child(even) {
+  margin-left: auto;
+}
+
+.timeline-card:nth-child(odd) .timeline-icon {
+  right: -80px;
+}
+
+.timeline-card:nth-child(even) .timeline-icon {
+  left: -80px;
+}
+
+.timeline-content {
+  padding-right: 2rem;
+}
+
+.timeline-content h3 {
+  color: var(--accent-color);
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.timeline-content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.timeline-content li {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  color: var(--text-color);
+}
+
+.timeline-content i {
+  margin-left: 0.5rem;
+  color: var(--accent-color);
+}
+
+/* تخصيصات الوضع الليلي */
+[data-theme="dark"] .timeline-card {
+  border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .timeline::before {
+  opacity: 0.3;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="best-practices-container">
+  <h2 class="section-title">أفضل ممارسات الأمن الرقمي</h2>
+  
+  <div class="timeline">
+    <!-- كلمات المرور -->
+    <div class="timeline-card" style="--accent-color: #3b82f6">
+      <div class="timeline-icon">
+        <i class="fas fa-key"></i>
+      </div>
+      <div class="timeline-content">
+        <h3>كلمات المرور القوية</h3>
+        <ul>
+          <li><i class="fas fa-check"></i> استخدم 12 حرفاً على الأقل</li>
+          <li><i class="fas fa-check"></i> دمج أحرف وأرقام ورموز</li>
+          <li><i class="fas fa-check"></i> لا تعيد استخدام كلمات المرور</li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- التحديثات -->
+    <div class="timeline-card" style="--accent-color: #10b981">
+      <div class="timeline-icon">
+        <i class="fas fa-sync-alt"></i>
+      </div>
+      <div class="timeline-content">
+        <h3>التحديثات الأمنية</h3>
+        <ul>
+          <li><i class="fas fa-check"></i> حدث أنظمة التشغيل بانتظام</li>
+          <li><i class="fas fa-check"></i> ثبّت تحديثات التطبيقات فوراً</li>
+          <li><i class="fas fa-check"></i> فعّل التحديث التلقائي</li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- المصادقة -->
+    <div class="timeline-card" style="--accent-color: #f59e0b">
+      <div class="timeline-icon">
+        <i class="fas fa-lock"></i>
+      </div>
+      <div class="timeline-content">
+        <h3>مصادقة ثنائية</h3>
+        <ul>
+          <li><i class="fas fa-check"></i> فعّلها على الحسابات المهمة</li>
+          <li><i class="fas fa-check"></i> استخدم تطبيق مصادقة بدلاً من SMS</li>
+          <li><i class="fas fa-check"></i> احتفظ برموز الاسترداد</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

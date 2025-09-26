@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+
+{% block title %}التوعية الأمنية - PhishGuard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edu-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .edu-title {
+        font-size: 2.5rem;
+        color: var(--text-color);
+        margin-bottom: 1rem;
+    }
+
+    .edu-section {
+        background: var(--container-bg);
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .edu-section h2 {
+        font-size: 2rem;
+        color: var(--text-color);
+        margin-bottom: 1rem;
+    }
+
+    .edu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .edu-card {
+        background: var(--container-bg);
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .edu-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .interactive-card {
+        cursor: pointer;
+    }
+
+    .edu-btn {
+        display: inline-block;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .edu-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .details-content {
+        font-size: 1.2rem;
+        line-height: 1.6;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease;
+    }
+
+    .details-content.show {
+        padding: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .details-content h4 {
+        font-size: 1.4rem;
+        color: var(--primary-color);
+        margin-bottom: 0.8rem;
+    }
+
+    .details-content ul {
+        padding-right: 1.5rem;
+    }
+
+    .details-content li {
+        margin-bottom: 0.5rem;
+    }
+
+    .quiz-section {
+        background: var(--container-bg);
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .quiz-question {
+        font-size: 1.2rem;
+        color: var(--text-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .quiz-options {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .quiz-option {
+        padding: 1rem;
+        background: var(--container-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .quiz-option:hover {
+        border-color: var(--primary-color);
+    }
+
+    .quiz-option.selected {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .quiz-option.correct-answer {
+        background: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+
+    .quiz-option.wrong-answer {
+        background: #dc3545;
+        color: white;
+        border-color: #dc3545;
+    }
+
+    .result-simple {
+      text-align: center;
+      padding: 2rem;
+      background: var(--container-bg);
+      border-radius: 15px;
+    }
+
+    #next-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 25px;
+    }
+
+    .result-box {
+      background: var(--container-bg);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .result-score {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .result-score.good {
+        color: #28a745;
+    }
+
+    .result-score.bad {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edu-container">
+    <h1 class="edu-title">التوعية الأمنية</h1>
+
+    <!-- Personal Security Section -->
+    <section class="edu-section">
+        <h2><i class="fas fa-user-shield"></i> الأمان الشخصي</h2>
+        <div class="edu-grid">
+          <!-- قسم الروابط -->
+          <div class="edu-card interactive-card">
+            <h3>التصيد عبر الروابط</h3>
+            <p>كشف الروابط الخادعة</p>
+            <button class="edu-btn" onclick="showDetails(this)">عرض التفاصيل</button>
+            <div class="details-content">
+              <h4>أمثلة شائعة:</h4>
+              <ul>
+                <li>روابط بتغييرات بسيطة في اسم الموقع</li>
+                <li>اختصارات روابط مخفية</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- قسم المرفقات -->
+          <div class="edu-card interactive-card">
+            <h3>التصيد عبر الملفات</h3>
+            <p>خدع الملفات الخطيرة</p>
+            <button class="edu-btn" onclick="showDetails(this)">عرض التفاصيل</button>
+            <div class="details-content">
+              <h4>تحذيرات هامة:</h4>
+              <ul>
+                <li>ملفات PDF تحتوي على روابط خبيثة</li>
+                <li>مستندات وورد أو إكسل ضارة</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- قسم البريد الإلكتروني -->
+          <div class="edu-card interactive-card">
+            <h3>التصيد بالبريد الإلكتروني</h3>
+            <p>رسائل احتيالية</p>
+            <button class="edu-btn" onclick="showDetails(this)">عرض التفاصيل</button>
+            <div class="details-content">
+              <h4>نصائح أمنية:</h4>
+              <ul>
+                <li>لا ترد على رسائل طلب البيانات</li>
+                <li>تحقق من عنوان المرسل</li>
+                <li>احذر العروض المغرية غير المتوقعة</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </section>
+
+    <!-- Interactive Quiz Section -->
+    <section class="edu-section quiz-section">
+        <h2><i class="fas fa-question-circle"></i> اختبار التوعية ضد التصيد</h2>
+        <div id="quiz-container">
+            <div class="quiz-question active">
+                <h3>السؤال 1/3</h3>
+                <p>ما هو الإجراء الصحيح عند تلقي رسالة بريد إلكتروني تطلب تحديث بياناتك البنكية؟</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="selectOption(this)">التأكد من صحة البريد ثم إدخال البيانات</div>
+                    <div class="quiz-option correct" onclick="selectOption(this)">عدم الرد وحذف الرسالة فوراً</div>
+                    <div class="quiz-option" onclick="selectOption(this)">إرسال البيانات المطلوبة بسرعة</div>
+                </div>
+            </div>
+
+            <div class="quiz-question">
+                <h3>السؤال 2/3</h3>
+                <p>كيف تتحقق من صحة رابط قبل النقر عليه؟</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="selectOption(this)">النقر عليه لمعرفة محتواه</div>
+                    <div class="quiz-option correct" onclick="selectOption(this)">تمرير المؤشر فوق الرابط لرؤية العنوان الحقيقي</div>
+                    <div class="quiz-option" onclick="selectOption(this)">إرساله لصديق لفحصه</div>
+                </div>
+            </div>
+
+            <div class="quiz-question">
+                <h3>السؤال 3/3</h3>
+                <p>ما هو الخطر الرئيسي لفتح مرفقات البريد الإلكتروني من مرسلين غير معروفين؟</p>
+                <div class="quiz-options">
+                    <div class="quiz-option correct" onclick="selectOption(this)">احتواؤها على برمجيات خبيثة</div>
+                    <div class="quiz-option" onclick="selectOption(this)">استهلاك مساحة التخزين</div>
+                    <div class="quiz-option" onclick="selectOption(this)">عدم القدرة على فتحها</div>
+                </div>
+            </div>
+        </div>
+        <button id="next-btn" class="edu-btn" onclick="showResult()">عرض النتيجة</button>
+        <div id="quiz-result"></div>
+    </section>
+
+    <script>
+function showDetails(btn) {
+  const details = btn.nextElementSibling;
+  details.style.maxHeight = details.classList.contains('show') ? '0' : '500px';
+  details.classList.toggle('show');
+  btn.textContent = details.classList.contains('show') ? 'إخفاء التفاصيل' : 'عرض التفاصيل';
+}
+
+function selectOption(option) {
+  // إزالة التحديد من جميع الخيارات
+  option.parentElement.querySelectorAll('.quiz-option').forEach(opt => {
+    opt.classList.remove('selected');
+  });
+  
+  // تحديد الخيار المختار
+  option.classList.add('selected');
+}
+
+function showResult() {
+  // التأكد من الإجابة على جميع الأسئلة
+  const allAnswered = document.querySelectorAll('.quiz-question').length === 
+                     document.querySelectorAll('.quiz-option.selected').length;
+  
+  if(!allAnswered) {
+    alert('الرجاء الإجابة على جميع الأسئلة أولاً');
+    return;
+  }
+
+  // حساب الإجابات الصحيحة وتحديد الإجابات الصحيحة والخاطئة
+  let correct = 0;
+  document.querySelectorAll('.quiz-question').forEach(question => {
+    const selectedOption = question.querySelector('.quiz-option.selected');
+    const correctOption = question.querySelector('.quiz-option.correct');
+    
+    if (selectedOption) {
+      if (selectedOption.classList.contains('correct')) {
+        correct++;
+        selectedOption.classList.add('correct-answer');
+      } else {
+        selectedOption.classList.add('wrong-answer');
+        correctOption.classList.add('correct-answer');
+      }
+    }
+  });
+
+  const total = document.querySelectorAll('.quiz-question').length;
+  const scoreClass = correct >= 2 ? 'good' : 'bad';
+
+  // عرض النتيجة
+  document.getElementById('quiz-result').innerHTML = `
+    <div class="result-box">
+      <h3 class="result-score ${scoreClass}">🎯 نتيجتك: ${correct}/${total}</h3>
+      <p>${correct >= 2 ? 'أحسنت! لديك معرفة جيدة بأمن المعلومات' : 'تحتاج إلى مراجعة المزيد عن أمن المعلومات'}</p>
+      <button class="edu-btn" onclick="resetQuiz()">حاول مرة أخرى</button>
+    </div>
+  `;
+
+  // تعطيل الأزرار بعد إظهار النتيجة
+  document.querySelectorAll('.quiz-option').forEach(option => {
+    option.style.pointerEvents = 'none';
+  });
+  document.getElementById('next-btn').style.display = 'none';
+}
+
+function resetQuiz() {
+  // إعادة تعيين الاختبار
+  document.querySelectorAll('.selected, .correct-answer, .wrong-answer').forEach(el => {
+    el.classList.remove('selected', 'correct-answer', 'wrong-answer');
+  });
+  document.getElementById('quiz-result').innerHTML = '';
+  
+  // إعادة تفعيل الأزرار
+  document.querySelectorAll('.quiz-option').forEach(option => {
+    option.style.pointerEvents = 'auto';
+  });
+  document.getElementById('next-btn').style.display = 'block';
+}
+    </script>
+</div>
+
+{% endblock %}
