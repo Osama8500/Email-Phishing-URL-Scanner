@@ -1,0 +1,465 @@
+{% extends "base.html" %}
+
+{% block title %}دليل التصيد الاحتيالي - PhishGuard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edu-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .edu-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    .edu-header h1 {
+        font-size: 2.5rem;
+        color: var(--text-color);
+        margin-bottom: 1rem;
+    }
+
+    .edu-header p {
+        font-size: 1.2rem;
+        color: var(--text-color-light);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .sidebar {
+        position: sticky;
+        top: 2rem;
+        height: fit-content;
+    }
+
+    .nav-sections {
+        background: var(--container-bg);
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .nav-sections h3 {
+        color: var(--text-color);
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .section-links {
+        list-style: none;
+        padding: 0;
+    }
+
+    .section-links li {
+        margin-bottom: 0.5rem;
+    }
+
+    .section-links a {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        color: var(--text-color);
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .section-links a:hover,
+    .section-links a.active {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .section-links i {
+        width: 20px;
+        text-align: center;
+    }
+
+    .main-content {
+        background: var(--container-bg);
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .content-section {
+        margin-bottom: 3rem;
+    }
+
+    .content-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .content-section h2 {
+        color: var(--text-color);
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .content-section p {
+        color: var(--text-color);
+        line-height: 1.7;
+        margin-bottom: 1rem;
+    }
+
+    .info-card {
+        background: var(--bg-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border-right: 4px solid var(--primary-color);
+    }
+
+    .info-card h3 {
+        color: var(--text-color);
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .example-list {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        gap: 1rem;
+    }
+
+    .example-item {
+        background: var(--bg-color);
+        border-radius: 10px;
+        padding: 1rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .example-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .example-content h4 {
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .example-content p {
+        color: var(--text-color-light);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .tips-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .tip-card {
+        background: var(--bg-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .tip-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .tip-card h3 {
+        color: var(--text-color);
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .tip-card p {
+        color: var(--text-color-light);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edu-container">
+    <div class="edu-header">
+        <h1>دليل التصيد الاحتيالي</h1>
+        <p>تعرف على كيفية حماية نفسك من هجمات التصيد الاحتيالي وكيفية اكتشافها والتعامل معها بشكل آمن</p>
+    </div>
+
+    <div class="content-grid">
+        <aside class="sidebar">
+            <nav class="nav-sections">
+                <h3>المحتويات</h3>
+                <ul class="section-links">
+                    <li>
+                        <a href="#intro" class="active">
+                            <i class="fas fa-info-circle"></i>
+                            مقدمة عن التصيد
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#types">
+                            <i class="fas fa-list"></i>
+                            أنواع التصيد
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#signs">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            علامات التحذير
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#protection">
+                            <i class="fas fa-shield-alt"></i>
+                            طرق الحماية
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#examples">
+                            <i class="fas fa-lightbulb"></i>
+                            أمثلة حقيقية
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <section id="intro" class="content-section">
+                <h2>
+                    <i class="fas fa-info-circle"></i>
+                    مقدمة عن التصيد الاحتيالي
+                </h2>
+                <p>التصيد الاحتيالي هو نوع من الهجمات الإلكترونية التي يحاول فيها المهاجمون خداع المستخدمين للحصول على معلوماتهم الشخصية والحساسة مثل كلمات المرور وأرقام البطاقات البنكية.</p>
+                
+                <div class="info-card">
+                    <h3>
+                        <i class="fas fa-chart-line"></i>
+                        إحصائيات مهمة
+                    </h3>
+                    <ul>
+                        <li>90% من الاختراقات تبدأ برسالة تصيد احتيالي</li>
+                        <li>يتم إرسال أكثر من 3 مليار رسالة تصيد يومياً</li>
+                        <li>30% من رسائل التصيد يتم فتحها من قبل المستهدفين</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="types" class="content-section">
+                <h2>
+                    <i class="fas fa-list"></i>
+                    أنواع التصيد الاحتيالي
+                </h2>
+                <div class="tips-grid">
+                    <div class="tip-card">
+                        <h3>
+                            <i class="fas fa-envelope"></i>
+                            التصيد عبر البريد
+                        </h3>
+                        <p>رسائل بريد إلكتروني تبدو كأنها من مصادر موثوقة تطلب معلومات شخصية أو مالية.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h3>
+                            <i class="fas fa-mobile-alt"></i>
+                            التصيد عبر الرسائل
+                        </h3>
+                        <p>رسائل نصية تحتوي على روابط مشبوهة أو تطلب معلومات شخصية.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h3>
+                            <i class="fas fa-globe"></i>
+                            التصيد عبر المواقع
+                        </h3>
+                        <p>مواقع مقلدة تشبه المواقع الأصلية لسرقة بيانات تسجيل الدخول.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="signs" class="content-section">
+                <h2>
+                    <i class="fas fa-exclamation-triangle"></i>
+                    علامات التحذير
+                </h2>
+                <div class="example-list">
+                    <div class="example-item">
+                        <div class="example-icon">
+                            <i class="fas fa-spell-check"></i>
+                        </div>
+                        <div class="example-content">
+                            <h4>أخطاء لغوية وإملائية</h4>
+                            <p>وجود أخطاء لغوية وإملائية واضحة في الرسائل الرسمية يعد مؤشراً على أنها مزيفة.</p>
+                        </div>
+                    </div>
+                    <div class="example-item">
+                        <div class="example-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="example-content">
+                            <h4>الإلحاح والضغط</h4>
+                            <p>محاولة خلق شعور بالضرورة والاستعجال لاتخاذ إجراء فوري.</p>
+                        </div>
+                    </div>
+                    <div class="example-item">
+                        <div class="example-icon">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <div class="example-content">
+                            <h4>روابط مشبوهة</h4>
+                            <p>روابط تبدو مشابهة للمواقع الأصلية لكن بتغييرات طفيفة في العنوان.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="protection" class="content-section">
+                <h2>
+                    <i class="fas fa-shield-alt"></i>
+                    طرق الحماية
+                </h2>
+                <div class="tips-grid">
+    <div class="tip-card">
+        <h3>
+            <i class="fas fa-external-link-alt"></i>
+            تجنّب الروابط المشبوهة
+        </h3>
+        <p>لا تضغط على أي رابط يصلك عبر البريد الإلكتروني أو الرسائل قبل التحقق من مصدره.</p>
+    </div>
+    
+    <div class="tip-card">
+        <h3>
+            <i class="fas fa-user-secret"></i>
+            لا تُدخل معلوماتك بسرعة
+        </h3>
+        <p>لا تكتب بياناتك الشخصية أو البنكية في أي موقع توصلك إليه رسالة مشبوهة.</p>
+    </div>
+    <div class="tip-card">
+        <h3>
+            <i class="fas fa-spell-check"></i>
+            لاحظ الأخطاء اللغوية
+        </h3>
+        <p>رسائل التصيّد غالبًا ما تحتوي على أخطاء إملائية أو لغة غير احترافية.</p>
+    </div>
+    <div class="tip-card">
+        <h3>
+            <i class="fas fa-shield-alt"></i>
+            استخدام برامج الحماية
+        </h3>
+        <p>ثبت برامج مكافحة الفيروسات وفحص الروابط، وتأكد أنها محدثة دائمًا.</p>
+    </div>
+</div>
+
+            </section>
+<section id="examples" class="content-section">
+  <h2>
+    <i class="fas fa-lightbulb"></i>
+    أمثلة حقيقية
+  </h2>
+
+  <div class="info-card">
+    <h3>
+      <i class="fas fa-envelope-open"></i>
+      مثال على رسالة تصيّد
+    </h3>
+    <div class="example-content">
+      <p>عزيزي العميل،</p>
+      <p>
+        لاحظنا نشاطًا غير مألوف على حسابك البنكي، وقد قمنا بتعليق الحساب مؤقتًا. رجاءً
+        <a href="http://www.bank-secure-verify.com" target="_blank" class="text-danger">
+          اضغط هنا لتأكيد هويتك
+        </a>
+        لتجنّب الإيقاف الدائم.
+      </p>
+      
+      <h4 class="text-muted">لماذا هذه رسالة تصيّد؟</h4>
+      <ul>
+        <li><strong>نطاق مريب:</strong> يستخدم <code>http://</code> بدلًا من <code>https://</code>، ولا يطابق اسم البنك.</li>
+        <li><strong>ضغط نفسي:</strong> عبارات الخوف والاستعجال («تم تعليق حسابك»، «تجنّب الإيقاف الدائم»).</li>
+        <li><strong>طلب معلومات حساسة:</strong> يوجّهك لإدخال بياناتك البنكية عبر رابط خارجي.</li>
+        <li><strong>صيغة رسمية مزيّفة:</strong> لا توقيع رقمي أو تفاصيل اتصال حقيقية.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // تفعيل التمرير السلس للروابط
+    document.querySelectorAll('.section-links a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+            const targetElement = document.getElementById(targetId);
+            
+            if (targetElement) {
+                // إزالة الكلاس active من جميع الروابط
+                document.querySelectorAll('.section-links a').forEach(l => l.classList.remove('active'));
+                // إضافة الكلاس active للرابط المحدد
+                this.classList.add('active');
+
+                // حساب الإزاحة للتمرير السلس
+                const offset = 100; // إضافة هامش علوي
+                const elementPosition = targetElement.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+
+    // تحديث الرابط النشط عند التمرير
+    window.addEventListener('scroll', function() {
+        const sections = document.querySelectorAll('.content-section');
+        let currentSection = '';
+
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            if (window.pageYOffset >= sectionTop - 300) {
+                currentSection = section.getAttribute('id');
+            }
+        });
+
+        document.querySelectorAll('.section-links a').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').substring(1) === currentSection) {
+                link.classList.add('active');
+            }
+        });
+    });
+</script>
+{% endblock %} 
