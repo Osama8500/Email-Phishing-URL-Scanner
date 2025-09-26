@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}PhishGuard - التقارير{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --container-bg: #fff;
+        --text-color: #333;
+        --text-color-light: #666;
+        --border-color: #ddd;
+        --primary-color: #1976d2;
+        --light-text: #666;
+    }
+
+    [data-theme="dark"] {
+        --glass-bg: rgba(0, 0, 0, 0.2);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --container-bg: #1a1a2e;
+        --text-color: #e0e0e0;
+        --text-color-light: #90a4ae;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --primary-color: #42a5f5;
+        --light-text: #90a4ae;
+    }
+
+    .reports-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .report-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .report-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .report-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .report-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--primary-color);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .report-title {
+        flex: 1;
+    }
+
+    .report-title h3 {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+
+    .report-title .subtitle {
+        color: var(--light-text);
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+
+    .report-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: var(--container-bg);
+        border-radius: 12px;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--light-text);
+        font-size: 0.9rem;
+    }
+
+    .chart-container {
+        width: 100%;
+        height: 200px;
+        margin-bottom: 1.5rem;
+    }
+
+    .report-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .report-actions button {
+        flex: 1;
+    }
+
+    .filters-section {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .date-range {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .date-range .form-group {
+        flex: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="scan-container">
+    <div class="scan-header">
+        <h1>التقارير والإحصائيات</h1>
+        <p class="subtitle">تحليل شامل لنتائج الفحص والتهديدات المكتشفة</p>
+    </div>
+
+    <div class="filters-section">
+        <div class="filter-group">
+            <label>نوع الفحص</label>
+            <select class="form-control">
+                <option value="all">الكل</option>
+                <option value="url">فحص الروابط</option>
+                <option value="email">فحص البريد</option>
+                <option value="file">فحص الملفات</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>الفترة الزمنية</label>
+            <div class="date-range">
+                <div class="form-group">
+                    <input type="date" class="form-control" placeholder="من">
+                </div>
+                <div class="form-group">
+                    <input type="date" class="form-control" placeholder="إلى">
+                </div>
+            </div>
+        </div>
+        <div class="filter-group">
+            <label>حالة التهديد</label>
+            <select class="form-control">
+                <option value="all">الكل</option>
+                <option value="safe">آمن</option>
+                <option value="suspicious">مشبوه</option>
+                <option value="malicious">خبيث</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="reports-container">
+        <!-- تقرير فحص الروابط -->
+        <div class="report-card">
+            <div class="report-header">
+                <div class="report-icon">
+                    <i class="fas fa-link"></i>
+                </div>
+                <div class="report-title">
+                    <h3>تقرير فحص الروابط</h3>
+                    <div class="subtitle">آخر 30 يوم</div>
+                </div>
+            </div>
+            <div class="report-stats">
+                <div class="stat-item">
+                    <div class="stat-value">150</div>
+                    <div class="stat-label">عمليات الفحص</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">15</div>
+                    <div class="stat-label">روابط خطرة</div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <!-- سيتم إضافة الرسم البياني هنا -->
+            </div>
+            <div class="report-actions">
+                <button class="btn btn-secondary">
+                    <i class="fas fa-download"></i>
+                    تحميل التقرير
+                </button>
+                <button class="btn btn-primary">
+                    <i class="fas fa-eye"></i>
+                    عرض التفاصيل
+                </button>
+            </div>
+        </div>
+
+        <!-- تقرير فحص البريد -->
+        <div class="report-card">
+            <div class="report-header">
+                <div class="report-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="report-title">
+                    <h3>تقرير فحص البريد</h3>
+                    <div class="subtitle">آخر 30 يوم</div>
+                </div>
+            </div>
+            <div class="report-stats">
+                <div class="stat-item">
+                    <div class="stat-value">85</div>
+                    <div class="stat-label">رسائل مفحوصة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">8</div>
+                    <div class="stat-label">تصيد محتمل</div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <!-- سيتم إضافة الرسم البياني هنا -->
+            </div>
+            <div class="report-actions">
+                <button class="btn btn-secondary">
+                    <i class="fas fa-download"></i>
+                    تحميل التقرير
+                </button>
+                <button class="btn btn-primary">
+                    <i class="fas fa-eye"></i>
+                    عرض التفاصيل
+                </button>
+            </div>
+        </div>
+
+        <!-- تقرير فحص الملفات -->
+        <div class="report-card">
+            <div class="report-header">
+                <div class="report-icon">
+                    <i class="fas fa-file-shield"></i>
+                </div>
+                <div class="report-title">
+                    <h3>تقرير فحص الملفات</h3>
+                    <div class="subtitle">آخر 30 يوم</div>
+                </div>
+            </div>
+            <div class="report-stats">
+                <div class="stat-item">
+                    <div class="stat-value">200</div>
+                    <div class="stat-label">ملفات مفحوصة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">برمجيات خبيثة</div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <!-- سيتم إضافة الرسم البياني هنا -->
+            </div>
+            <div class="report-actions">
+                <button class="btn btn-secondary">
+                    <i class="fas fa-download"></i>
+                    تحميل التقرير
+                </button>
+                <button class="btn btn-primary">
+                    <i class="fas fa-eye"></i>
+                    عرض التفاصيل
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // سيتم إضافة كود الرسوم البيانية هنا
+    document.addEventListener('DOMContentLoaded', function() {
+        const chartContainers = document.querySelectorAll('.chart-container');
+        
+        chartContainers.forEach((container, index) => {
+            const canvas = document.createElement('canvas');
+            container.appendChild(canvas);
+            
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1', '5', '10', '15', '20', '25', '30'],
+                    datasets: [{
+                        label: 'عمليات الفحص',
+                        data: generateRandomData(),
+                        borderColor: 'rgb(74, 144, 226)',
+                        tension: 0.4,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    });
+
+    function generateRandomData() {
+        return Array.from({length: 7}, () => Math.floor(Math.random() * 50));
+    }
+</script>
+{% endblock %} 

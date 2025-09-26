@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}PhishGuard - الإشعارات{% endblock %}
+
+{% block extra_css %}
+<style>
+    .notifications-container { 
+        max-width:800px; 
+        margin:2rem auto; 
+        padding:0 1rem; 
+    }
+    .notifications-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:2rem;
+        background:var(--primary-color);
+        padding:1rem;
+        border-radius:8px;
+    }
+    .notifications-header h1 {
+        color:#fff;
+        font-size:1.5rem;
+        margin:0;
+        font-weight:600;
+    }
+    .notifications-count { 
+        background:rgba(255,255,255,0.2); 
+        color:#fff; 
+        border-radius:50%; 
+        padding:0.3rem 0.7rem; 
+        font-size:1rem;
+    }
+
+    .notification-list { 
+        display:flex; 
+        flex-direction:column; 
+        gap:1rem; 
+    }
+    .notification-item {
+        background:var(--card-bg);
+        border-radius:8px;
+        padding:1.5rem 1.5rem 1.5rem 4rem;
+        position:relative;
+        border-left:6px solid transparent;
+        box-shadow:0 2px 4px rgba(0,0,0,0.1);
+    }
+    .notification-item:hover { 
+        background:var(--hover-bg); 
+    }
+
+    .notification-item.red    { border-left-color:#f44336; }
+    .notification-item.yellow { border-left-color:#ffc107; }
+    .notification-item.green  { border-left-color:#4caf50; }
+
+    .notification-icon { 
+        position:absolute; 
+        top:1.5rem; 
+        left:1.5rem; 
+        font-size:1.5rem; 
+    }
+    .notification-icon.red    { color:#f44336; }
+    .notification-icon.yellow { color:#ffc107; }
+    .notification-icon.green  { color:#4caf50; }
+
+    .notification-header { 
+        display:flex; 
+        justify-content:space-between; 
+        align-items:center; 
+        margin-bottom:1rem; 
+    }
+    .notification-title { 
+        margin:0; 
+        font-size:1.2rem; 
+        color:var(--text-color);
+        font-weight:600;
+    }
+    .notification-time  { 
+        font-size:0.9rem; 
+        color:var(--text-color-light);
+    }
+    .notification-message { 
+        margin:0; 
+        font-size:1rem; 
+        color:var(--text-color);
+        line-height:1.5;
+    }
+
+    .no-notifications { 
+        text-align:center; 
+        padding:3rem; 
+        color:var(--text-color-light);
+    }
+    .no-notifications i { 
+        font-size:3rem; 
+        margin-bottom:1rem; 
+        color:var(--border-color);
+    }
+    .no-notifications h3 {
+        font-size:1.3rem;
+        margin-bottom:0.5rem;
+    }
+
+    /* Dark mode */
+    [data-theme="dark"] .notification-item { background:rgba(255,255,255,0.05); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="notifications-container">
+    <div class="notifications-header">
+        <h1>الإشعارات <span class="notifications-count">{{ unread_count }}</span></h1>
+        {% if notifications.items|length > 0 %}
+        <button class="mark-all-btn" onclick="markAllAsRead()">
+            <i class="fas fa-check-double"></i> تحديد الكل كمقروء
+        </button>
+        {% endif %}
+    </div>
+
+    <div class="notification-list">
+        {% if notifications.items|length > 0 %}
+            {% for notification in notifications.items %}
+                {% set text = (notification.title ~ ' ' ~ notification.message)|lower %}
+                {% if 'مشبوه' in text %}
+                    {% set color = 'red' %}
+                {% elif 'يحتاج مراجعة' in text %}
+                    {% set color = 'yellow' %}
+                {% else %}
+                    {% set color = 'green' %}
+                {% endif %}
+                <div class="notification-item {{ color }} {{ 'unread' if not notification.is_read }}">
+                    <span class="notification-icon {{ color }}">
+                        {% if color == 'red' %}<i class="fas fa-exclamation-triangle"></i>
+                        {% elif color == 'yellow' %}<i class="fas fa-exclamation-circle"></i>
+                        {% else %}<i class="fas fa-check-circle"></i>{% endif %}
+                    </span>
+                    <div class="notification-header">
+                        <h3 class="notification-title">{{ notification.title }}</h3>
+                        <time class="notification-time" title="{{ notification.created_at }}">
+                            {{ notification.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        </time>
+                    </div>
+                    <p class="notification-message">{{ notification.message }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-notifications">
+                <i class="fas fa-bell-slash"></i>
+                <h3>لا توجد إشعارات</h3>
+                <p>ستظهر هنا الإشعارات المتعلقة بنشاطك على الموقع</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function markAllAsRead() {
+    fetch('/notifications/mark-all-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // إزالة علامة غير مقروء من جميع الإشعارات
+            document.querySelectorAll('.notification-item.unread').forEach(i => i.classList.remove('unread'));
+            // إعادة تحميل الصفحة لتحديث العداد
+            window.location.reload();
+        }
+    })
+    .catch(e => console.error('Error marking notifications as read:', e));
+}
+</script>
+{% endblock %}

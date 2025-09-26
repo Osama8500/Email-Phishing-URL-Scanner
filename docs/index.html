@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}PhishGuard - الرئيسية{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-content">
+        <h1>حماية  متقدمة من التصيد الاحتيالي</h1>
+        <p class="subtitle">نظام ذكي يساعدك في كشف وحماية نفسك من هجمات التصيد الاحتيالي</p>
+        <div class="hero-buttons">
+            <!-- ربط الزر بمعرّف القسم -->
+            <a href="#services" class="btn btn-primary">
+                <i class="fas fa-shield-alt"></i>
+                ابدأ الفحص الآن
+            </a>
+            <a href="/edu/educational_videos" class="btn btn-secondary">
+                <i class="fas fa-book"></i>
+                تعلم المزيد
+            </a>
+        </div>
+    </div>
+    <div class="hero-image">
+        <i class="fas fa-shield-alt"></i>
+    </div>
+</div>
+
+<section id="services" class="services-section">
+    <h2 class="section-title">خدماتنا</h2>
+    <div class="services-container">
+        <!-- خدمة فحص الروابط -->
+        <a href="/url_check" class="service-box">
+            <div class="service-icon">
+                <i class="fas fa-link"></i>
+            </div>
+            <h3>فحص الروابط</h3>
+            <p>تحقق من أمان الروابط وكشف محاولات التصيد الاحتيالي</p>
+            <div class="service-hover">
+                ابدأ الفحص
+                <i class="fas fa-arrow-left"></i>
+            </div>
+        </a>
+
+        <!-- خدمة فحص البريد -->
+        <a href="/email_check" class="service-box">
+            <div class="service-icon">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <h3>فحص البريد الإلكتروني</h3>
+            <p>تحليل رسائل البريد الإلكتروني للكشف عن محاولات الاحتيال</p>
+            <div class="service-hover">
+                ابدأ الفحص
+                <i class="fas fa-arrow-left"></i>
+            </div>
+        </a>
+
+        <!-- خدمة فحص الملفات -->
+        <a href="/file_check" class="service-box">
+            <div class="service-icon">
+                <i class="fas fa-file-shield"></i>
+            </div>
+            <h3>فحص الملفات</h3>
+            <p>تحليل الملفات المرفقة للكشف عن البرمجيات الخبيثة</p>
+            <div class="service-hover">
+                ابدأ الفحص
+                <i class="fas fa-arrow-left"></i>
+            </div>
+        </a>
+    </div>
+</section>
+
+<section class="features-section">
+    <h2 class="section-title">مميزاتنا</h2>
+    <div class="features-container">
+        <div class="feature-card">
+            <i class="fas fa-bolt"></i>
+            <h3>فحص سريع</h3>
+            <p>نتائج فورية وتحليل دقيق</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-shield-check"></i>
+            <h3>حماية متقدمة</h3>
+            <p>تقنيات متطورة لكشف التهديدات</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-chart-line"></i>
+            <h3>تقارير تفصيلية</h3>
+            <p>تحليلات وإحصائيات شاملة</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-graduation-cap"></i>
+            <h3>موارد تعليمية</h3>
+            <p>دليل شامل للتوعية الأمنية</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // سلايد سلس عند الضغط على زر "ابدأ الفحص الآن" مع رفع المسافة 100px
+  document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.querySelector('.hero-buttons a[href="#services"]');
+    if (btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.getElementById('services');
+        if (target) {
+          const offset = 100; // عدد البيكسل اللي بدك ترفعه
+          const topPos = target.getBoundingClientRect().top + window.pageYOffset;
+          window.scrollTo({
+            top: topPos - offset,
+            behavior: 'smooth'
+          });
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

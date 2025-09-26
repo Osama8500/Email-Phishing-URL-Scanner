@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}PhishGuard - إحصائيات الفحص{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --container-bg: #fff;
+        --text-color: #333;
+        --text-color-light: #666;
+        --border-color: #ddd;
+        --primary-color: #1976d2;
+        --light-text: #666;
+        --card-bg: #fff;
+        --hover-bg: #f5f5f5;
+        --chart-bg: #fff;
+    }
+
+    [data-theme="dark"] {
+        --glass-bg: rgba(0, 0, 0, 0.2);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --container-bg: #1a1a2e;
+        --text-color: #e0e0e0;
+        --text-color-light: #90a4ae;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --primary-color: #42a5f5;
+        --light-text: #90a4ae;
+        --card-bg: #1a1a2e;
+        --hover-bg: #252525;
+        --chart-bg: #1a1a2e;
+    }
+
+    .stats-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .stats-header {
+        margin-bottom: 2rem;
+        color: var(--text-color);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 15px;
+        padding: 1.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--primary-color);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .stat-title {
+        color: var(--text-color);
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-subtitle {
+        color: var(--text-color-light);
+        font-size: 0.9rem;
+    }
+
+    .chart-container {
+        background: var(--chart-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .chart-title {
+        color: var(--text-color);
+        font-size: 1.2rem;
+    }
+
+    .chart-filters {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .chart-filter {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .chart-filter:hover,
+    .chart-filter.active {
+        background: var(--primary-color);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="stats-container">
+    <div class="stats-header">
+        <h1>إحصائيات الفحص</h1>
+        <p>تحليل شامل لنتائج عمليات الفحص</p>
+    </div>
+
+    <div class="stats-grid">
+        <!-- إحصائيات فحص الروابط -->
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-link"></i>
+                </div>
+            </div>
+            <div class="stat-title">فحص الروابط</div>
+            <div class="stat-value">{{ url_scans }}</div>
+            <div class="stat-subtitle">إجمالي عمليات فحص الروابط</div>
+        </div>
+
+        <!-- إحصائيات فحص البريد -->
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+            </div>
+            <div class="stat-title">فحص البريد</div>
+            <div class="stat-value">{{ email_scans }}</div>
+            <div class="stat-subtitle">إجمالي عمليات فحص البريد</div>
+        </div>
+
+        <!-- إحصائيات فحص الملفات -->
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-file-shield"></i>
+                </div>
+            </div>
+            <div class="stat-title">فحص الملفات</div>
+            <div class="stat-value">{{ file_scans }}</div>
+            <div class="stat-subtitle">إجمالي عمليات فحص الملفات</div>
+        </div>
+    </div>
+
+    <!-- الرسم البياني -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <h2 class="chart-title">تحليل عمليات الفحص</h2>
+            <div class="chart-filters">
+                <button class="chart-filter active" data-period="week">أسبوع</button>
+                <button class="chart-filter" data-period="month">شهر</button>
+                <button class="chart-filter" data-period="year">سنة</button>
+            </div>
+        </div>
+        <canvas id="scanChart"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // تهيئة الرسم البياني
+    const ctx = document.getElementById('scanChart').getContext('2d');
+    const scanChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
+            datasets: [{
+                label: 'عمليات الفحص',
+                data: [12, 19, 3, 5, 2, 3, 7],
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
+                    },
+                    ticks: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
+                    }
+                },
+                x: {
+                    grid: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
+                    },
+                    ticks: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
+                    }
+                }
+            }
+        }
+    });
+
+    // تحديث ألوان الرسم البياني عند تغيير الوضع
+    document.addEventListener('themeChanged', function(e) {
+        const theme = e.detail.theme;
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color');
+        const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color');
+        
+        scanChart.options.plugins.legend.labels.color = textColor;
+        scanChart.options.scales.y.grid.color = borderColor;
+        scanChart.options.scales.x.grid.color = borderColor;
+        scanChart.options.scales.y.ticks.color = textColor;
+        scanChart.options.scales.x.ticks.color = textColor;
+        
+        scanChart.update();
+    });
+
+    // تفعيل فلاتر الرسم البياني
+    document.querySelectorAll('.chart-filter').forEach(filter => {
+        filter.addEventListener('click', function() {
+            document.querySelectorAll('.chart-filter').forEach(f => f.classList.remove('active'));
+            this.classList.add('active');
+            // هنا يمكن إضافة منطق تحديث البيانات حسب الفترة المحددة
+        });
+    });
+</script>
+{% endblock %} 

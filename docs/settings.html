@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}PhishGuard - الإعدادات{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --container-bg: #fff;
+        --text-color: #333;
+        --text-color-light: #666;
+        --border-color: #ddd;
+        --primary-color: #1976d2;
+        --light-text: #666;
+    }
+
+    [data-theme="dark"] {
+        --glass-bg: rgba(0, 0, 0, 0.2);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --container-bg: #1a1a2e;
+        --text-color: #e0e0e0;
+        --text-color-light: #90a4ae;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --primary-color: #42a5f5;
+        --light-text: #90a4ae;
+    }
+
+    .settings-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .scan-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .scan-header h1 {
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+        color: var(--light-text);
+        font-size: 1.1rem;
+    }
+
+    .settings-section {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .settings-section h2 {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        color: var(--text-color);
+        font-size: 1.5rem;
+    }
+
+    .settings-section h2 i {
+        width: 40px;
+        height: 40px;
+        background: var(--primary-color);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .settings-group {
+        margin-bottom: 2rem;
+    }
+
+    .settings-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .setting-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: background-color 0.3s ease;
+    }
+
+    .setting-item:hover {
+        background: var(--glass-bg);
+    }
+
+    .setting-item:last-child {
+        border-bottom: none;
+    }
+
+    .setting-label {
+        flex: 1;
+    }
+
+    .setting-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: var(--text-color);
+    }
+
+    .setting-description {
+        font-size: 0.9rem;
+        color: var(--light-text);
+    }
+
+    .setting-control {
+        margin-right: 2rem;
+    }
+
+    /* تخصيص مفتاح التبديل */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--border-color);
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: var(--primary-color);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+    /* تخصيص القوائم المنسدلة */
+    .settings-select {
+        background: var(--container-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        color: var(--text-color);
+        min-width: 200px;
+        transition: all 0.3s ease;
+    }
+
+    .settings-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+        outline: none;
+    }
+
+    /* تحسينات إضافية */
+    .settings-section {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .settings-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <div class="scan-header">
+        <h1>الإعدادات</h1>
+        <p class="subtitle">تخصيص إعدادات التطبيق وتفضيلات الأمان</p>
+    </div>
+
+    <!-- إعدادات الواجهة -->
+    <div class="settings-section">
+        <h2>
+            <i class="fas fa-palette"></i>
+            إعدادات الواجهة
+        </h2>
+        <div class="settings-group">
+            <div class="setting-item">
+                <div class="setting-label">
+                    <div class="setting-title">الوضع المظلم</div>
+                    <div class="setting-description">تمكين الوضع المظلم للواجهة</div>
+                </div>
+                <div class="setting-control">
+                    <label class="switch">
+                        <input type="checkbox" id="darkModeToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- إعدادات الإشعارات -->
+    <div class="settings-section">
+        <h2>
+            <i class="fas fa-bell"></i>
+            إعدادات الإشعارات
+        </h2>
+        <div class="settings-group">
+            <div class="setting-item">
+                <div class="setting-label">
+                    <div class="setting-title">الإشعارات المباشرة</div>
+                    <div class="setting-description">تلقي إشعارات فورية عن النشاطات المهمة</div>
+                </div>
+                <div class="setting-control">
+                    <label class="switch">
+                        <input type="checkbox" id="pushNotificationsToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <div class="setting-title">إشعارات البريد الإلكتروني</div>
+                    <div class="setting-description">تلقي تحديثات عبر البريد الإلكتروني</div>
+                </div>
+                <div class="setting-control">
+                    <label class="switch">
+                        <input type="checkbox" id="emailNotificationsToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // تهيئة حالة الوضع المظلم
+    document.addEventListener('DOMContentLoaded', function() {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const currentTheme = localStorage.getItem('theme');
+        
+        if (currentTheme === 'dark') {
+            darkModeToggle.checked = true;
+        }
+
+        darkModeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    });
+</script>
+{% endblock %} 

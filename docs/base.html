@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PhishGuard{% endblock %}</title>
+    
+    <!-- Bootstrap RTL -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- زر تبديل الوضع المظلم -->
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="تبديل الوضع المظلم">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <!-- شريط التنقل -->
+    <nav class="navbar">
+        {% include 'navbar.html' %}
+    </nav>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 PhishGuard. جميع الحقوق محفوظة.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+    
+    <!-- Theme Management -->
+    <script>
+        // تهيئة الوضع المظلم عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            // التحقق من وجود تفضيل محفوظ للوضع المظلم
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+            } else {
+                // إذا لم يكن هناك تفضيل محفوظ، استخدم تفضيل النظام
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const defaultTheme = prefersDark ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', defaultTheme);
+                localStorage.setItem('theme', defaultTheme);
+                updateThemeIcon(defaultTheme);
+            }
+        });
+
+        // تبديل الوضع المظلم
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            // تحديث السمة وحفظها في localStorage
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // تحديث أيقونة الزر
+            updateThemeIcon(newTheme);
+        }
+
+        // تحديث أيقونة زر تبديل السمة
+        function updateThemeIcon(theme) {
+            const themeIcon = document.querySelector('.theme-toggle i');
+            themeIcon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

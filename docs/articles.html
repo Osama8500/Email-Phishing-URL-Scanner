@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}PhishGuard - قاعدة المعرفة{% endblock %}
+
+{% block extra_css %}
+<style>
+    .articles-container {
+        min-height: 100vh;
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        background: #f0f7ff;
+    }
+
+    .articles-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .articles-header h1 {
+        font-size: 2.2rem;
+        color: #1a237e;
+        margin-bottom: 1rem;
+    }
+
+    .articles-header p {
+        font-size: 1.2rem;
+        color: #546e7a;
+    }
+
+    .search-bar {
+        max-width: 600px;
+        margin: 0 auto 3rem;
+        position: relative;
+    }
+
+    .search-bar input {
+        width: 100%;
+        padding: 1rem 3rem 1rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-bar input:focus {
+        border-color: #1976d2;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+    }
+
+    .search-bar i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #1976d2;
+        font-size: 1.2rem;
+    }
+
+    .categories {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .category-btn {
+        padding: 0.5rem 1.5rem;
+        border: none;
+        border-radius: 25px;
+        background: white;
+        color: #1976d2;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .category-btn:hover,
+    .category-btn.active {
+        background: #1976d2;
+        color: white;
+    }
+
+    .articles-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .article-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .article-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .article-image {
+        height: 200px;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .article-content {
+        padding: 1.5rem;
+    }
+
+    .article-category {
+        display: inline-block;
+        padding: 0.3rem 1rem;
+        background: #e3f2fd;
+        color: #1976d2;
+        border-radius: 15px;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .article-title {
+        font-size: 1.3rem;
+        color: #1a237e;
+        margin-bottom: 1rem;
+    }
+
+    .article-excerpt {
+        color: #546e7a;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .article-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #90a4ae;
+        font-size: 0.9rem;
+    }
+
+    .read-more {
+        color: #1976d2;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .read-more:hover {
+        text-decoration: underline;
+    }
+
+    /* Dark mode styles */
+    [data-theme="dark"] .articles-container {
+        background: #1a1a2e;
+    }
+
+    [data-theme="dark"] .articles-header h1 {
+        color: #90caf9;
+    }
+
+    [data-theme="dark"] .articles-header p {
+        color: #b0bec5;
+    }
+
+    [data-theme="dark"] .search-bar input {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: #e0e0e0;
+    }
+
+    [data-theme="dark"] .category-btn {
+        background: rgba(255, 255, 255, 0.1);
+        color: #90caf9;
+    }
+
+    [data-theme="dark"] .category-btn:hover,
+    [data-theme="dark"] .category-btn.active {
+        background: #1976d2;
+        color: white;
+    }
+
+    [data-theme="dark"] .article-card {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    [data-theme="dark"] .article-category {
+        background: rgba(25, 118, 210, 0.2);
+    }
+
+    [data-theme="dark"] .article-title {
+        color: #90caf9;
+    }
+
+    [data-theme="dark"] .article-excerpt {
+        color: #b0bec5;
+    }
+
+    [data-theme="dark"] .article-meta {
+        color: #78909c;
+    }
+
+    [data-theme="dark"] .read-more {
+        color: #90caf9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="articles-container">
+    <div class="articles-header">
+        <h1>قاعدة المعرفة</h1>
+        <p>اكتشف مقالات وإرشادات مفصلة حول الأمن السيبراني والحماية من التصيد الاحتيالي</p>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" placeholder="ابحث في المقالات..." id="searchInput">
+        <i class="fas fa-search"></i>
+    </div>
+
+    <div class="categories">
+        <button class="category-btn active">الكل</button>
+        <button class="category-btn">التصيد الاحتيالي</button>
+        <button class="category-btn">الأمن السيبراني</button>
+        <button class="category-btn">حماية البريد</button>
+        <button class="category-btn">أفضل الممارسات</button>
+    </div>
+
+    <div class="articles-grid">
+        <!-- مقال 1 -->
+        <article class="article-card">
+            <div class="article-image" style="background-image: url('/static/images/phishing-signs.jpg')"></div>
+            <div class="article-content">
+                <span class="article-category">التصيد الاحتيالي</span>
+                <h2 class="article-title">10 علامات للتعرف على رسائل التصيد الاحتيالي</h2>
+                <p class="article-excerpt">تعرف على العلامات الرئيسية التي تساعدك في كشف رسائل التصيد الاحتيالي وحماية نفسك من الاحتيال.</p>
+                <div class="article-meta">
+                    <span>5 دقائق للقراءة</span>
+                    <a href="/articles/phishing-signs" class="read-more">
+                        اقرأ المزيد
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+        </article>
+
+        <!-- مقال 2 -->
+        <article class="article-card">
+            <div class="article-image" style="background-image: url('/static/images/password-security.jpg')"></div>
+            <div class="article-content">
+                <span class="article-category">الأمن السيبراني</span>
+                <h2 class="article-title">دليلك الشامل لإنشاء كلمات مرور قوية</h2>
+                <p class="article-excerpt">تعلم كيفية إنشاء كلمات مرور قوية وآمنة وكيفية حمايتها من الاختراق.</p>
+                <div class="article-meta">
+                    <span>7 دقائق للقراءة</span>
+                    <a href="/articles/password-security" class="read-more">
+                        اقرأ المزيد
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+        </article>
+
+        <!-- مقال 3 -->
+        <article class="article-card">
+            <div class="article-image" style="background-image: url('/static/images/email-security.jpg')"></div>
+            <div class="article-content">
+                <span class="article-category">حماية البريد</span>
+                <h2 class="article-title">كيفية تأمين بريدك الإلكتروني من الاختراق</h2>
+                <p class="article-excerpt">خطوات عملية لحماية حسابك البريدي وتجنب الوقوع ضحية للاختراق.</p>
+                <div class="article-meta">
+                    <span>6 دقائق للقراءة</span>
+                    <a href="/articles/email-security" class="read-more">
+                        اقرأ المزيد
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+        </article>
+
+        <!-- مقال 4 -->
+        <article class="article-card">
+            <div class="article-image" style="background-image: url('/static/images/best-practices.jpg')"></div>
+            <div class="article-content">
+                <span class="article-category">أفضل الممارسات</span>
+                <h2 class="article-title">أفضل ممارسات الأمن السيبراني للشركات</h2>
+                <p class="article-excerpt">دليل شامل للشركات حول كيفية حماية بياناتها وموظفيها من التهديدات السيبرانية.</p>
+                <div class="article-meta">
+                    <span>8 دقائق للقراءة</span>
+                    <a href="/articles/cybersecurity-best-practices" class="read-more">
+                        اقرأ المزيد
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // تفعيل البحث
+    const searchInput = document.getElementById('searchInput');
+    const articles = document.querySelectorAll('.article-card');
+
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        
+        articles.forEach(article => {
+            const title = article.querySelector('.article-title').textContent.toLowerCase();
+            const excerpt = article.querySelector('.article-excerpt').textContent.toLowerCase();
+            const category = article.querySelector('.article-category').textContent.toLowerCase();
+            
+            if (title.includes(searchTerm) || excerpt.includes(searchTerm) || category.includes(searchTerm)) {
+                article.style.display = '';
+            } else {
+                article.style.display = 'none';
+            }
+        });
+    });
+
+    // تفعيل التصفية حسب الفئة
+    const categoryButtons = document.querySelectorAll('.category-btn');
+    
+    categoryButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // إزالة الفئة النشطة من جميع الأزرار
+            categoryButtons.forEach(btn => btn.classList.remove('active'));
+            // إضافة الفئة النشطة للزر المحدد
+            button.classList.add('active');
+            
+            const category = button.textContent.toLowerCase();
+            
+            articles.forEach(article => {
+                if (category === 'الكل') {
+                    article.style.display = '';
+                } else {
+                    const articleCategory = article.querySelector('.article-category').textContent.toLowerCase();
+                    article.style.display = articleCategory === category ? '' : 'none';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %} 
